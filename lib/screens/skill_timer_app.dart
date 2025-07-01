@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class SkillTimerApp extends StatefulWidget {
   @override
-  const SkillTimerApp({Key? key}) : super(key: key);
+  const SkillTimerApp({super.key});
   @override
   State<SkillTimerApp> createState() => _SkillTimerAppState();
 }
