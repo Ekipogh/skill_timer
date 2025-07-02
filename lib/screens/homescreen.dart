@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill_category.dart';
 import 'skills_screen.dart';
+import '../utils/icons.dart';
 
 class SkillCategoryTile extends StatelessWidget {
   final SkillCategory skillCategory;
@@ -20,7 +21,7 @@ class SkillCategoryTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: Icon(
-          Icons.school, // You can map iconPath to actual icons later
+          getIcon(iconName: skillCategory.iconPath),
           color: Theme.of(context).primaryColor,
         ),
         title: Text(

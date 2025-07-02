@@ -3,6 +3,7 @@ import 'package:sqflite/sqlite_api.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../services/database.dart';
+import '../utils/constants.dart';
 
 class DataSeeder {
   static final DBProvider _dbProvider = DBProvider();
@@ -11,6 +12,13 @@ class DataSeeder {
   static Future<void> seedSampleData() async {
     _cachedDatabase ??= await _dbProvider.database;
     final db = _cachedDatabase!;
+
+    final dbVersion = await db.getVersion();
+    final dbVersionConfig = AppConstants.databaseVersion;
+    // if database version doesn't config, drop all tables
+    if (dbVersion < dbVersionConfig) {
+      await DBProvider.resetDatabase();
+    }
 
     await seedCategories(db);
     await seedSkills(db);

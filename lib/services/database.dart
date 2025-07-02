@@ -1,4 +1,5 @@
 import 'package:sqflite/sqflite.dart';
+import '../utils/constants.dart';
 
 class DBProvider {
   static final DBProvider _instance = DBProvider._internal();
@@ -24,7 +25,7 @@ class DBProvider {
     // Open the database with version and onCreate callback
     return await openDatabase(
       path,
-      version: 2,
+      version: AppConstants.databaseVersion,
       onCreate: (db, version) async {
         // Create tables here
         await db.execute('''
@@ -60,5 +61,14 @@ class DBProvider {
         ''');
       },
     );
+  }
+
+  static Future<void> resetDatabase() async {
+    final db = await DBProvider().database;
+    await db.execute('DROP TABLE IF EXISTS skill_categories');
+    await db.execute('DROP TABLE IF EXISTS skills');
+    await db.execute('DROP TABLE IF EXISTS timer_sessions');
+    // Reinitialize the database
+    await DBProvider()._initDB();
   }
 }
