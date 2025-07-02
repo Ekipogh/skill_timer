@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:skill_timer/widgets/dragable.dart';
+import 'package:skill_timer/widgets/draggable.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../providers/skill_category_provider.dart';
@@ -315,7 +315,7 @@ class SkillCard extends StatelessWidget {
               ),
               onTap: onTap,
             ),
-            DragableIcon(key: Key('dragable_icon_${skill.id}')),
+            DraggableIndicator(key: Key('dragable_icon_${skill.id}')),
           ],
         ),
       ),

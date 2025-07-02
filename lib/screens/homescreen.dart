@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/widgets/background.dart';
-import 'package:skill_timer/widgets/dragable.dart';
+import 'package:skill_timer/widgets/draggable.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill_category.dart';
 import 'skills_screen.dart';
@@ -59,7 +59,7 @@ class SkillCategoryTile extends StatelessWidget {
               trailing: const Icon(Icons.arrow_forward_ios),
               onTap: onTap,
             ),
-            DragableIcon(key: Key('dragable_icon_${skillCategory.id}')),
+            DraggableIndicator(key: Key('dragable_icon_${skillCategory.id}')),
           ],
         ),
       ),
