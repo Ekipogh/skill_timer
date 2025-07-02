@@ -25,7 +25,7 @@ class SkillCategory {
     return 'SkillCategory(id: $id, name: $name, description: $description, iconPath: $iconPath)';
   }
 
-  copyWith({required String name, required String description}) {
+  SkillCategory copyWith({required String name, required String description}) {
     return SkillCategory(
       id: id,
       name: name,

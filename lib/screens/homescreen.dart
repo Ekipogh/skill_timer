@@ -359,7 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
           label: 'Undo',
           onPressed: () {
             // Restore the skill category if undo is pressed
-            context.read<SkillProvider>().addSkillCategory(skillCategory);
+            context.read<SkillProvider>().restoreSkillCategory(skillCategory);
           },
         ),
         duration: const Duration(seconds: 4),
