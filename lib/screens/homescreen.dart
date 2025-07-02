@@ -24,18 +24,23 @@ class SkillCategoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(skillCategory.id),
+      key: UniqueKey(),
       direction: DismissDirection.horizontal,
       background: SwipeBackground(isLeft: true),
       secondaryBackground: SwipeBackground(isLeft: false),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
-          return await _showDeleteConfirmationDialog(context, skillCategory);
+          return await _showDeleteConfirmationDialog(context);
         } else if (direction == DismissDirection.startToEnd) {
           onEdit?.call();
           return false; // No action for edit, handled in onTap
         }
         return false; // No action for other directions
+      },
+      onDismissed: (direction) {
+        if (direction == DismissDirection.endToStart) {
+          onDelete?.call();
+        }
       },
       child: Card(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -61,38 +66,31 @@ class SkillCategoryTile extends StatelessWidget {
     );
   }
 
-  Future<bool> _showDeleteConfirmationDialog(
-    BuildContext context,
-    SkillCategory skillCategory,
-  ) {
-    return showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Skill Category'),
-        content: Text(
-          'Are you sure you want to delete "${skillCategory.name}"?',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              context.read<SkillProvider>().deleteSkillCategory(
-                skillCategory.id,
-              );
-              Navigator.of(context).pop(true);
-            },
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+  Future<bool> _showDeleteConfirmationDialog(BuildContext context) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Skill Category'),
+            content: Text(
+              'Are you sure you want to delete "${skillCategory.name}"?',
             ),
-            child: const Text('Delete'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-        ],
-      ),
-    ).then((value) => value ?? false);
+        ) ??
+        false; // Default to false if dialog is dismissed
   }
 }
 
@@ -350,19 +348,21 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _deleteSkillCategory(SkillCategory skillCategory) {
-    // Show confirmation dialog before deleting
+    // Immediately delete from provider to remove from UI
     context.read<SkillProvider>().deleteSkillCategory(skillCategory.id);
+
+    // Show confirmation snackbar with undo option
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('Deleted "${skillCategory.name}" skill category'),
         action: SnackBarAction(
           label: 'Undo',
           onPressed: () {
-            context.read<SkillProvider>().restoreSkillCategory(
-              skillCategory,
-            );
+            // Restore the skill category if undo is pressed
+            context.read<SkillProvider>().addSkillCategory(skillCategory);
           },
         ),
+        duration: const Duration(seconds: 4),
       ),
     );
   }

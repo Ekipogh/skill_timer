@@ -181,7 +181,9 @@ class _SkillsScreenState extends State<SkillsScreen> {
 
   void _showEditSkillDialog(Skill skill) {
     final nameController = TextEditingController(text: skill.name);
-    final descriptionController = TextEditingController(text: skill.description);
+    final descriptionController = TextEditingController(
+      text: skill.description,
+    );
 
     showDialog(
       context: context,
@@ -251,13 +253,13 @@ class SkillCard extends StatelessWidget {
     required this.onTap,
     this.onDelete,
     this.onEdit,
-    super.key
+    super.key,
   });
 
   @override
   Widget build(BuildContext context) {
     return Dismissible(
-      key: Key(skill.id),
+      key: UniqueKey(),
       direction: DismissDirection.horizontal,
       background: SwipeBackground(isLeft: true),
       secondaryBackground: SwipeBackground(isLeft: false),
@@ -283,8 +285,13 @@ class SkillCard extends StatelessWidget {
           children: [
             ListTile(
               leading: CircleAvatar(
-                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-                child: Icon(Icons.psychology, color: Theme.of(context).primaryColor),
+                backgroundColor: Theme.of(
+                  context,
+                ).primaryColor.withOpacity(0.1),
+                child: Icon(
+                  Icons.psychology,
+                  color: Theme.of(context).primaryColor,
+                ),
               ),
               title: Text(
                 skill.name,
@@ -308,9 +315,7 @@ class SkillCard extends StatelessWidget {
               ),
               onTap: onTap,
             ),
-            DragableIcon(
-              key: Key('dragable_icon_${skill.id}'),
-            ),
+            DragableIcon(key: Key('dragable_icon_${skill.id}')),
           ],
         ),
       ),
@@ -319,26 +324,29 @@ class SkillCard extends StatelessWidget {
 
   Future<bool> _showDeleteConfirmation(BuildContext context) async {
     return await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Delete Skill'),
-        content: Text('Are you sure you want to delete "${skill.name}"?\n\nThis will also delete all associated timer sessions.'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.red,
-              foregroundColor: Colors.white,
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Delete Skill'),
+            content: Text(
+              'Are you sure you want to delete "${skill.name}"?\n\nThis will also delete all associated timer sessions.',
             ),
-            child: const Text('Delete'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.of(context).pop(true),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('Delete'),
+              ),
+            ],
           ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
   }
 
   String _formatTime(int seconds) {
