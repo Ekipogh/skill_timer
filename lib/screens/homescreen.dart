@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill_category.dart';
+import 'skills_screen.dart';
+import '../utils/icons.dart';
 
-class SkillTile extends StatelessWidget {
+class SkillCategoryTile extends StatelessWidget {
   final SkillCategory skillCategory;
   final VoidCallback onTap;
 
-  const SkillTile({
+  const SkillCategoryTile({
     required this.skillCategory,
     required this.onTap,
     super.key,
@@ -19,7 +21,7 @@ class SkillTile extends StatelessWidget {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
       child: ListTile(
         leading: Icon(
-          Icons.school, // You can map iconPath to actual icons later
+          getIcon(iconName: skillCategory.iconPath),
           color: Theme.of(context).primaryColor,
         ),
         title: Text(
@@ -47,7 +49,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Load skill categories when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SkillCategoryProvider>().loadSkillCategories();
+      context.read<SkillProvider>().loadSkillCategories();
     });
   }
 
@@ -60,19 +62,17 @@ class _HomeScreenState extends State<HomeScreen> {
           IconButton(
             icon: const Icon(Icons.refresh),
             onPressed: () {
-              context.read<SkillCategoryProvider>().refresh();
+              context.read<SkillProvider>().refresh();
             },
             tooltip: 'Refresh',
           ),
         ],
       ),
-      body: Consumer<SkillCategoryProvider>(
+      body: Consumer<SkillProvider>(
         builder: (context, provider, child) {
           // Loading state
           if (provider.isLoading && provider.skillCategories.isEmpty) {
-            return const Center(
-              child: CircularProgressIndicator(),
-            );
+            return const Center(child: CircularProgressIndicator());
           }
 
           // Error state
@@ -81,11 +81,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.error_outline,
-                    size: 64,
-                    color: Colors.red[300],
-                  ),
+                  Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
                   const SizedBox(height: 16),
                   Text(
                     'Error: ${provider.error}',
@@ -137,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
               itemCount: provider.skillCategories.length,
               itemBuilder: (context, index) {
                 final skillCategory = provider.skillCategories[index];
-                return SkillTile(
+                return SkillCategoryTile(
                   skillCategory: skillCategory,
                   onTap: () => _onSkillCategoryTap(skillCategory),
                 );
@@ -155,13 +151,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _onSkillCategoryTap(SkillCategory skillCategory) {
-    // Navigate to skill timer screen for this category
-    print("Tapped on skill category: ${skillCategory.name}");
-    // TODO: Navigate to timer screen
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('Starting timer for ${skillCategory.name}'),
-        duration: const Duration(seconds: 2),
+    // Navigate to skills screen for this category
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SkillsScreen(category: skillCategory),
       ),
     );
   }
@@ -217,7 +211,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   iconPath: 'school', // Default icon
                 );
 
-                context.read<SkillCategoryProvider>().addSkillCategory(newCategory);
+                context.read<SkillProvider>().addSkillCategory(newCategory);
                 Navigator.of(context).pop();
               }
             },

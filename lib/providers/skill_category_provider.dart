@@ -1,14 +1,18 @@
 import 'package:flutter/foundation.dart';
 import '../models/skill_category.dart';
+import '../models/skill.dart';
 import '../services/database.dart';
 
-class SkillCategoryProvider extends ChangeNotifier {
+class SkillProvider extends ChangeNotifier {
   List<SkillCategory> _skillCategories = [];
+  List<Skill> _skills = [];
   bool _isLoading = false;
   String? _error;
 
   // Getters
-  List<SkillCategory> get skillCategories => List.unmodifiable(_skillCategories);
+  List<SkillCategory> get skillCategories =>
+      List.unmodifiable(_skillCategories);
+  List<Skill> get skills => List.unmodifiable(_skills);
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasError => _error != null;
@@ -23,14 +27,23 @@ class SkillCategoryProvider extends ChangeNotifier {
 
     try {
       final db = await DBProvider().database;
-      final List<Map<String, dynamic>> maps = await db.query('skill_categories');
+      final List<Map<String, dynamic>> maps = await db.query(
+        'skill_categories',
+      );
 
-      _skillCategories = maps.map((map) => SkillCategory(
-        id: map['id'],
-        name: map['name'],
-        description: map['description'],
-        iconPath: map['iconPath'],
-      )).toList();
+      _skillCategories = maps
+          .map(
+            (map) => SkillCategory(
+              id: map['id'],
+              name: map['name'],
+              description: map['description'],
+              iconPath: map['iconPath'],
+            ),
+          )
+          .toList();
+
+      // Also load skills when loading categories
+      await loadSkills();
 
       notifyListeners();
     } catch (e) {
@@ -93,11 +106,7 @@ class SkillCategoryProvider extends ChangeNotifier {
 
     try {
       final db = await DBProvider().database;
-      await db.delete(
-        'skill_categories',
-        where: 'id = ?',
-        whereArgs: [id],
-      );
+      await db.delete('skill_categories', where: 'id = ?', whereArgs: [id]);
 
       // Remove from local list
       _skillCategories.removeWhere((sc) => sc.id == id);
@@ -112,7 +121,8 @@ class SkillCategoryProvider extends ChangeNotifier {
   // Refresh data from database
   Future<void> refresh() async {
     _skillCategories.clear();
-    await loadSkillCategories();
+    _skills.clear();
+    await loadSkillCategories(); // This will also load skills
   }
 
   // Private helper methods
@@ -133,8 +143,91 @@ class SkillCategoryProvider extends ChangeNotifier {
   // Clear all data (useful for logout, etc.)
   void clear() {
     _skillCategories.clear();
+    _skills.clear();
     _isLoading = false;
     _error = null;
     notifyListeners();
+  }
+
+  getSkillsForCategory(String categoryId) {
+    return _skills.where((skill) => skill.category == categoryId).toList();
+  }
+
+  // Add a new skill
+  Future<void> addSkill(Skill skill) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.insert('skills', skill.toJson());
+
+      // Add to local list and notify listeners
+      _skills.add(skill);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to add skill: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Load skills from database
+  Future<void> loadSkills() async {
+    // Don't set loading state here since it's called from loadSkillCategories
+    try {
+      final db = await DBProvider().database;
+      final List<Map<String, dynamic>> maps = await db.query('skills');
+
+      _skills = maps.map((map) => Skill.fromJson(map)).toList();
+    } catch (e) {
+      _setError('Failed to load skills: ${e.toString()}');
+    }
+  }
+
+  // Update a skill (e.g., after timer session)
+  Future<void> updateSkill(Skill skill) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.update(
+        'skills',
+        skill.toJson(),
+        where: 'id = ?',
+        whereArgs: [skill.id],
+      );
+
+      // Update local list
+      final index = _skills.indexWhere((s) => s.id == skill.id);
+      if (index != -1) {
+        _skills[index] = skill;
+        notifyListeners();
+      }
+    } catch (e) {
+      _setError('Failed to update skill: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Delete a skill
+  Future<void> deleteSkill(String id) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.delete('skills', where: 'id = ?', whereArgs: [id]);
+
+      // Remove from local list
+      _skills.removeWhere((s) => s.id == id);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to delete skill: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
   }
 }

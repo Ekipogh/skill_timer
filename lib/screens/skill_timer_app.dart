@@ -14,9 +14,7 @@ class _SkillTimerAppState extends State<SkillTimerApp> {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => SkillCategoryProvider()),
-      ],
+      providers: [ChangeNotifierProvider(create: (context) => SkillProvider())],
       child: MaterialApp(
         title: 'Skill Timer',
         theme: ThemeData(primarySwatch: Colors.blue),

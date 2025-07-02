@@ -4,24 +4,15 @@ class AppConstants {
   // App info
   static const String appName = 'Skill Timer';
   static const String appVersion = '1.0.0';
-  
+
   // Timer defaults
   static const int defaultSessionDuration = 25 * 60; // 25 minutes in seconds
   static const int shortBreakDuration = 5 * 60; // 5 minutes
   static const int longBreakDuration = 15 * 60; // 15 minutes
-  
-  // Categories
-  static const List<String> defaultCategories = [
-    'Programming',
-    'Design',
-    'Language Learning',
-    'Music',
-    'Sports',
-    'Reading',
-    'Writing',
-    'Other',
-  ];
-  
+
+  // Database version
+  static const int databaseVersion = 2;
+
   // Storage keys
   static const String skillsStorageKey = 'skills';
   static const String sessionsStorageKey = 'sessions';
