@@ -1,9 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:skill_timer/screens/skill_timer_app.dart';
-import 'package:skill_timer/services/database.dart';
+import 'package:skill_timer/utils/data_seeder.dart';
 
-void main() async{
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final database = await DBProvider().database;
+
+  // Seed sample data on first run
+  await DataSeeder.seedSampleData();
+
   runApp(const SkillTimerApp());
 }

@@ -7,24 +7,33 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-
-import 'package:skill_timer/main.dart';
+import 'package:skill_timer/screens/skill_timer_app.dart';
+import 'package:skill_timer/screens/homescreen.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
+  testWidgets('Skill Timer App starts with HomeScreen', (
+    WidgetTester tester,
+  ) async {
     // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+    await tester.pumpWidget(const SkillTimerApp());
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    // Verify that HomeScreen is displayed.
+    expect(find.byType(HomeScreen), findsOneWidget);
+  });
 
-    // Tap the '+' icon and trigger a frame.
-    await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+  testWidgets('HomeScreen has AppBar with title', (WidgetTester tester) async {
+    await tester.pumpWidget(const SkillTimerApp());
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    // Verify that the AppBar has the correct title.
+    expect(find.text('Skill Timer'), findsOneWidget);
+  });
+
+  testWidgets('HomeScreen has FloatingActionButton', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(const SkillTimerApp());
+
+    // Verify that there is a FloatingActionButton.
+    expect(find.byType(FloatingActionButton), findsOneWidget);
   });
 }

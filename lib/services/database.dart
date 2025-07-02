@@ -28,11 +28,21 @@ class DBProvider {
       onCreate: (db, version) async {
         // Create tables here
         await db.execute('''
-          CREATE TABLE skills (
+          CREATE TABLE skill_categories (
             id TEXT PRIMARY KEY,
             name TEXT,
             description TEXT,
             iconPath TEXT
+          )
+        ''');
+        await db.execute('''
+          CREATE TABLE skills (
+            id TEXT PRIMARY KEY,
+            name TEXT,
+            description TEXT,
+            iconPath TEXT,
+            categoryId TEXT,
+            FOREIGN KEY (categoryId) REFERENCES skill_categories (id)
           )
         ''');
         await db.execute('''
