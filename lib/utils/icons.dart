@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-Map<String, IconData> iconMap = {
+const Map<String, IconData> iconMap = {
   'code': Icons.code,
   'brush': Icons.brush,
   'music_note': Icons.music_note,

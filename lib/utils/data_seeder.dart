@@ -18,6 +18,7 @@ class DataSeeder {
     // if database version doesn't config, drop all tables
     if (dbVersion < dbVersionConfig) {
       await DBProvider.resetDatabase();
+      _cachedDatabase = await _dbProvider.database; // Reinitialize after reset
     }
 
     await seedCategories(db);
