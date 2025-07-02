@@ -3,7 +3,6 @@ class Skill {
   final String name;
   final String description;
   final String category;
-  final DateTime createdAt;
   final int totalTimeSpent; // in seconds
   final int sessionsCount;
 
@@ -12,7 +11,6 @@ class Skill {
     required this.name,
     required this.description,
     required this.category,
-    required this.createdAt,
     this.totalTimeSpent = 0,
     this.sessionsCount = 0,
   });
@@ -23,10 +21,43 @@ class Skill {
       'name': name,
       'description': description,
       'category': category,
-      'createdAt': createdAt.toIso8601String(),
       'totalTimeSpent': totalTimeSpent,
       'sessionsCount': sessionsCount,
     };
+  }
+
+  // Alias for toMap() for consistency with common Flutter patterns
+  Map<String, dynamic> toJson() => toMap();
+
+  // Create from JSON/Map
+  factory Skill.fromJson(Map<String, dynamic> json) {
+    return Skill(
+      id: json['id'],
+      name: json['name'],
+      description: json['description'],
+      category: json['category'],
+      totalTimeSpent: json['totalTimeSpent'] ?? 0,
+      sessionsCount: json['sessionsCount'] ?? 0,
+    );
+  }
+
+  // Copy with changes
+  Skill copyWith({
+    String? id,
+    String? name,
+    String? description,
+    String? category,
+    int? totalTimeSpent,
+    int? sessionsCount,
+  }) {
+    return Skill(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      category: category ?? this.category,
+      totalTimeSpent: totalTimeSpent ?? this.totalTimeSpent,
+      sessionsCount: sessionsCount ?? this.sessionsCount,
+    );
   }
 
   @override

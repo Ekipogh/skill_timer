@@ -24,7 +24,7 @@ class DBProvider {
     // Open the database with version and onCreate callback
     return await openDatabase(
       path,
-      version: 1,
+      version: 2,
       onCreate: (db, version) async {
         // Create tables here
         await db.execute('''
@@ -41,8 +41,10 @@ class DBProvider {
             name TEXT,
             description TEXT,
             iconPath TEXT,
-            categoryId TEXT,
-            FOREIGN KEY (categoryId) REFERENCES skill_categories (id)
+            category TEXT,
+            totalTimeSpent INTEGER DEFAULT 0, -- in seconds
+            sessionsCount INTEGER DEFAULT 0,
+            FOREIGN KEY (category) REFERENCES skill_categories (id)
           )
         ''');
         await db.execute('''
