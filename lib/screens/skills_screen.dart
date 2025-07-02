@@ -53,6 +53,15 @@ class _SkillsScreenState extends State<SkillsScreen> {
                     style: Theme.of(context).textTheme.bodyMedium,
                     textAlign: TextAlign.center,
                   ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Tip: Once you have skills, swipe left to delete or right to edit',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: Colors.grey[600],
+                      fontStyle: FontStyle.italic,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
                 ],
               ),
             );
@@ -63,7 +72,12 @@ class _SkillsScreenState extends State<SkillsScreen> {
             itemCount: skills.length,
             itemBuilder: (context, index) {
               final skill = skills[index];
-              return SkillCard(skill: skill, onTap: () => _startTimer(skill));
+              return SkillCard(
+                skill: skill,
+                onTap: () => _startTimer(skill),
+                onDelete: () => _deleteSkill(skill),
+                onEdit: () => _editSkill(skill),
+              );
             },
           );
         },
@@ -141,46 +155,227 @@ class _SkillsScreenState extends State<SkillsScreen> {
       ),
     );
   }
+
+  void _deleteSkill(Skill skill) {
+    // You'll need to implement this method in your SkillProvider
+    context.read<SkillProvider>().deleteSkill(skill.id);
+
+    // Show confirmation snackbar
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('${skill.name} deleted'),
+        action: SnackBarAction(
+          label: 'UNDO',
+          onPressed: () {
+            // You could implement undo functionality here
+            // context.read<SkillProvider>().restoreSkill(skill);
+          },
+        ),
+      ),
+    );
+  }
+
+  void _editSkill(Skill skill) {
+    _showEditSkillDialog(skill);
+  }
+
+  void _showEditSkillDialog(Skill skill) {
+    final nameController = TextEditingController(text: skill.name);
+    final descriptionController = TextEditingController(text: skill.description);
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Skill'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Skill Name',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.sentences,
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.trim().isNotEmpty) {
+                final updatedSkill = Skill(
+                  id: skill.id,
+                  name: nameController.text.trim(),
+                  description: descriptionController.text.trim(),
+                  category: skill.category,
+                  totalTimeSpent: skill.totalTimeSpent,
+                  sessionsCount: skill.sessionsCount,
+                );
+
+                // You'll need to implement this method in your SkillProvider
+                context.read<SkillProvider>().updateSkill(updatedSkill);
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
 }
 
 class SkillCard extends StatelessWidget {
   final Skill skill;
   final VoidCallback onTap;
+  final VoidCallback? onDelete;
+  final VoidCallback? onEdit;
 
-  const SkillCard({required this.skill, required this.onTap, super.key});
+  const SkillCard({
+    required this.skill,
+    required this.onTap,
+    this.onDelete,
+    this.onEdit,
+    super.key
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
-          child: Icon(Icons.psychology, color: Theme.of(context).primaryColor),
-        ),
-        title: Text(
-          skill.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+    return Dismissible(
+      key: Key(skill.id),
+      direction: DismissDirection.horizontal,
+      background: _buildSwipeBackground(context, isLeft: true),
+      secondaryBackground: _buildSwipeBackground(context, isLeft: false),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          // Swiping left to delete
+          return await _showDeleteConfirmation(context);
+        } else if (direction == DismissDirection.startToEnd) {
+          // Swiping right to edit
+          onEdit?.call();
+          return false; // Don't dismiss, just trigger edit
+        }
+        return false;
+      },
+      onDismissed: (direction) {
+        if (direction == DismissDirection.endToStart) {
+          onDelete?.call();
+        }
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Stack(
           children: [
-            if (skill.description.isNotEmpty) Text(skill.description),
-            const SizedBox(height: 4),
-            Text(
-              '${_formatTime(skill.totalTimeSpent)} • ${skill.sessionsCount} sessions',
-              style: Theme.of(context).textTheme.bodySmall,
+            ListTile(
+              leading: CircleAvatar(
+                backgroundColor: Theme.of(context).primaryColor.withOpacity(0.1),
+                child: Icon(Icons.psychology, color: Theme.of(context).primaryColor),
+              ),
+              title: Text(
+                skill.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  if (skill.description.isNotEmpty) Text(skill.description),
+                  const SizedBox(height: 4),
+                  Text(
+                    '${_formatTime(skill.totalTimeSpent)} • ${skill.sessionsCount} sessions',
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ],
+              ),
+              trailing: IconButton(
+                icon: const Icon(Icons.play_arrow),
+                onPressed: onTap,
+                tooltip: 'Start Timer',
+              ),
+              onTap: onTap,
+            ),
+            // Subtle swipe indicator
+            Positioned(
+              top: 8,
+              right: 8,
+              child: Icon(
+                Icons.drag_handle,
+                size: 16,
+                color: Colors.grey[400],
+              ),
             ),
           ],
         ),
-        trailing: IconButton(
-          icon: const Icon(Icons.play_arrow),
-          onPressed: onTap,
-          tooltip: 'Start Timer',
-        ),
-        onTap: onTap,
       ),
     );
+  }
+
+  Widget _buildSwipeBackground(BuildContext context, {required bool isLeft}) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isLeft ? Colors.blue : Colors.red,
+        borderRadius: BorderRadius.circular(12),
+      ),
+      alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            isLeft ? Icons.edit : Icons.delete,
+            color: Colors.white,
+            size: 32,
+          ),
+          const SizedBox(height: 4),
+          Text(
+            isLeft ? 'Edit' : 'Delete',
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<bool> _showDeleteConfirmation(BuildContext context) async {
+    return await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Skill'),
+        content: Text('Are you sure you want to delete "${skill.name}"?\n\nThis will also delete all associated timer sessions.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    ) ?? false;
   }
 
   String _formatTime(int seconds) {
