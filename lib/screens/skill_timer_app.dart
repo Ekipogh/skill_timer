@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skill_timer/screens/homescreen.dart';
 
 class SkillTimerApp extends StatefulWidget {
   @override
@@ -12,17 +13,8 @@ class _SkillTimerAppState extends State<SkillTimerApp> {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Skill Timer',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: Scaffold(
-        appBar: AppBar(
-          title: const Text('Skill Timer'),
-        ),
-        body: const Center(
-          child: Text('Welcome to Skill Timer!'),
-        ),
-      ),
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: HomeScreen(key: const Key('home_screen')),
     );
   }
 }
