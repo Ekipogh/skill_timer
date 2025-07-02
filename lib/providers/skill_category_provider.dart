@@ -230,4 +230,40 @@ class SkillProvider extends ChangeNotifier {
       _setLoading(false);
     }
   }
+
+  Future<void> restoreSkill(Skill skill) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.insert('skills', skill.toJson());
+
+      // Add to local list and notify listeners
+      _skills.add(skill);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to restore skill: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> restoreSkillCategory(SkillCategory category) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.insert('skill_categories', category.toMap());
+
+      // Add to local list and notify listeners
+      _skillCategories.add(category);
+      notifyListeners();
+    } catch (e) {
+      _setError('Failed to restore skill category: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
 }

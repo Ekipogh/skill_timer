@@ -24,4 +24,13 @@ class SkillCategory {
   String toString() {
     return 'SkillCategory(id: $id, name: $name, description: $description, iconPath: $iconPath)';
   }
+
+  SkillCategory copyWith({required String name, required String description}) {
+    return SkillCategory(
+      id: id,
+      name: name,
+      description: description,
+      iconPath: iconPath,
+    );
+  }
 }
