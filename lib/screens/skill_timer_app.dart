@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:skill_timer/screens/homescreen.dart';
+import 'package:skill_timer/providers/skill_category_provider.dart';
 
 class SkillTimerApp extends StatefulWidget {
   @override
@@ -11,10 +13,15 @@ class SkillTimerApp extends StatefulWidget {
 class _SkillTimerAppState extends State<SkillTimerApp> {
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Skill Timer',
-      theme: ThemeData(primarySwatch: Colors.blue),
-      home: HomeScreen(key: const Key('home_screen')),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => SkillCategoryProvider()),
+      ],
+      child: MaterialApp(
+        title: 'Skill Timer',
+        theme: ThemeData(primarySwatch: Colors.blue),
+        home: HomeScreen(key: const Key('home_screen')),
+      ),
     );
   }
 }
