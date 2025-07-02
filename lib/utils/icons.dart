@@ -12,6 +12,21 @@ const Map<String, IconData> iconMap = {
   'kitchen': Icons.kitchen,
   'palette': Icons.palette,
   'book': Icons.book,
+  'draw': Icons.draw,
+  'school': Icons.school,
+  'sports': Icons.sports,
+  'science': Icons.science,
+  'business': Icons.business,
+  'psychology': Icons.psychology,
+  'garage': Icons.garage,
+  'home': Icons.home,
+  'gamepad': Icons.gamepad,
+  'yard': Icons.yard,
+  'hiking': Icons.hiking,
+  'directions_run': Icons.directions_run,
+  'sports_baseball': Icons.sports_baseball,
+  'directions_bike': Icons.directions_bike,
+  'directions_boat': Icons.directions_boat,
 };
 
 IconData getIcon({required String iconName}) {
