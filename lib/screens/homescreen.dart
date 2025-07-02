@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/widgets/background.dart';
+import 'package:skill_timer/widgets/dragable.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill_category.dart';
 import 'skills_screen.dart';
@@ -8,31 +10,89 @@ import '../utils/icons.dart';
 class SkillCategoryTile extends StatelessWidget {
   final SkillCategory skillCategory;
   final VoidCallback onTap;
+  final VoidCallback? onEdit;
+  final VoidCallback? onDelete;
 
   const SkillCategoryTile({
     required this.skillCategory,
     required this.onTap,
     super.key,
+    this.onEdit,
+    this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: ListTile(
-        leading: Icon(
-          getIcon(iconName: skillCategory.iconPath),
-          color: Theme.of(context).primaryColor,
+    return Dismissible(
+      key: Key(skillCategory.id),
+      direction: DismissDirection.horizontal,
+      background: SwipeBackground(isLeft: true),
+      secondaryBackground: SwipeBackground(isLeft: false),
+      confirmDismiss: (direction) async {
+        if (direction == DismissDirection.endToStart) {
+          return await _showDeleteConfirmationDialog(context, skillCategory);
+        } else if (direction == DismissDirection.startToEnd) {
+          onEdit?.call();
+          return false; // No action for edit, handled in onTap
+        }
+        return false; // No action for other directions
+      },
+      child: Card(
+        margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        child: Stack(
+          children: [
+            ListTile(
+              leading: Icon(
+                getIcon(iconName: skillCategory.iconPath),
+                color: Theme.of(context).primaryColor,
+              ),
+              title: Text(
+                skillCategory.name,
+                style: const TextStyle(fontWeight: FontWeight.bold),
+              ),
+              subtitle: Text(skillCategory.description),
+              trailing: const Icon(Icons.arrow_forward_ios),
+              onTap: onTap,
+            ),
+            DragableIcon(key: Key('dragable_icon_${skillCategory.id}')),
+          ],
         ),
-        title: Text(
-          skillCategory.name,
-          style: const TextStyle(fontWeight: FontWeight.bold),
-        ),
-        subtitle: Text(skillCategory.description),
-        trailing: const Icon(Icons.arrow_forward_ios),
-        onTap: onTap,
       ),
     );
+  }
+
+  Future<bool> _showDeleteConfirmationDialog(
+    BuildContext context,
+    SkillCategory skillCategory,
+  ) {
+    return showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Skill Category'),
+        content: Text(
+          'Are you sure you want to delete "${skillCategory.name}"?',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              context.read<SkillProvider>().deleteSkillCategory(
+                skillCategory.id,
+              );
+              Navigator.of(context).pop(true);
+            },
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+            ),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    ).then((value) => value ?? false);
   }
 }
 
@@ -57,6 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        leading: const Icon(Icons.timer_outlined),
         title: const Text('Skill Timer'),
         actions: [
           IconButton(
@@ -136,6 +197,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 return SkillCategoryTile(
                   skillCategory: skillCategory,
                   onTap: () => _onSkillCategoryTap(skillCategory),
+                  onEdit: () => _editSkillCategory(skillCategory),
+                  onDelete: () => _deleteSkillCategory(skillCategory),
                 );
               },
             ),
@@ -218,6 +281,88 @@ class _HomeScreenState extends State<HomeScreen> {
             child: const Text('Add'),
           ),
         ],
+      ),
+    );
+  }
+
+  void _showEditSkillCategoryDialog(SkillCategory skillCategory) {
+    final nameController = TextEditingController(text: skillCategory.name);
+    final descriptionController = TextEditingController(
+      text: skillCategory.description,
+    );
+
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Edit Skill Category'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: nameController,
+              decoration: const InputDecoration(
+                labelText: 'Name',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.words,
+            ),
+            const SizedBox(height: 16),
+            TextField(
+              controller: descriptionController,
+              decoration: const InputDecoration(
+                labelText: 'Description',
+                border: OutlineInputBorder(),
+              ),
+              textCapitalization: TextCapitalization.sentences,
+              maxLines: 3,
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            onPressed: () {
+              if (nameController.text.trim().isNotEmpty) {
+                final updatedCategory = skillCategory.copyWith(
+                  name: nameController.text.trim(),
+                  description: descriptionController.text.trim(),
+                );
+
+                context.read<SkillProvider>().updateSkillCategory(
+                  updatedCategory,
+                );
+                Navigator.of(context).pop();
+              }
+            },
+            child: const Text('Save'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _editSkillCategory(SkillCategory skillCategory) {
+    // Show dialog to edit existing skill category
+    _showEditSkillCategoryDialog(skillCategory);
+  }
+
+  void _deleteSkillCategory(SkillCategory skillCategory) {
+    // Show confirmation dialog before deleting
+    context.read<SkillProvider>().deleteSkillCategory(skillCategory.id);
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text('Deleted "${skillCategory.name}" skill category'),
+        action: SnackBarAction(
+          label: 'Undo',
+          onPressed: () {
+            context.read<SkillProvider>().restoreSkillCategory(
+              skillCategory,
+            );
+          },
+        ),
       ),
     );
   }

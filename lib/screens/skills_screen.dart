@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/widgets/dragable.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../providers/skill_category_provider.dart';
+import '../widgets/background.dart';
 
 class SkillsScreen extends StatefulWidget {
   final SkillCategory category;
@@ -157,7 +159,6 @@ class _SkillsScreenState extends State<SkillsScreen> {
   }
 
   void _deleteSkill(Skill skill) {
-    // You'll need to implement this method in your SkillProvider
     context.read<SkillProvider>().deleteSkill(skill.id);
 
     // Show confirmation snackbar
@@ -167,8 +168,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
         action: SnackBarAction(
           label: 'UNDO',
           onPressed: () {
-            // You could implement undo functionality here
-            // context.read<SkillProvider>().restoreSkill(skill);
+            context.read<SkillProvider>().restoreSkill(skill);
           },
         ),
       ),
@@ -259,8 +259,8 @@ class SkillCard extends StatelessWidget {
     return Dismissible(
       key: Key(skill.id),
       direction: DismissDirection.horizontal,
-      background: _buildSwipeBackground(context, isLeft: true),
-      secondaryBackground: _buildSwipeBackground(context, isLeft: false),
+      background: SwipeBackground(isLeft: true),
+      secondaryBackground: SwipeBackground(isLeft: false),
       confirmDismiss: (direction) async {
         if (direction == DismissDirection.endToStart) {
           // Swiping left to delete
@@ -308,48 +308,11 @@ class SkillCard extends StatelessWidget {
               ),
               onTap: onTap,
             ),
-            // Subtle swipe indicator
-            Positioned(
-              top: 8,
-              right: 8,
-              child: Icon(
-                Icons.drag_handle,
-                size: 16,
-                color: Colors.grey[400],
-              ),
+            DragableIcon(
+              key: Key('dragable_icon_${skill.id}'),
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildSwipeBackground(BuildContext context, {required bool isLeft}) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      decoration: BoxDecoration(
-        color: isLeft ? Colors.blue : Colors.red,
-        borderRadius: BorderRadius.circular(12),
-      ),
-      alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
-      padding: const EdgeInsets.symmetric(horizontal: 20),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(
-            isLeft ? Icons.edit : Icons.delete,
-            color: Colors.white,
-            size: 32,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            isLeft ? 'Edit' : 'Delete',
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ],
       ),
     );
   }
