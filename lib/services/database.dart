@@ -48,17 +48,6 @@ class DBProvider {
             FOREIGN KEY (category) REFERENCES skill_categories (id)
           )
         ''');
-        await db.execute('''
-          CREATE TABLE timer_sessions (
-            id TEXT PRIMARY KEY,
-            skillId TEXT,
-            startTime TEXT,
-            endTime TEXT,
-            duration INTEGER,
-            notes TEXT,
-            isCompleted INTEGER
-          )
-        ''');
       },
     );
   }
@@ -67,7 +56,6 @@ class DBProvider {
     final db = await DBProvider().database;
     await db.execute('DROP TABLE IF EXISTS skill_categories');
     await db.execute('DROP TABLE IF EXISTS skills');
-    await db.execute('DROP TABLE IF EXISTS timer_sessions');
     // Reinitialize the database
     await DBProvider()._initDB();
   }
