@@ -155,9 +155,11 @@ void main() {
 
     // Verify that SkillsScreen is displayed
     expect(find.byType(SkillsScreen), findsOneWidget);
-
     // Verify we're on the Programming skills screen
-    expect(find.text('Programming'), findsOneWidget);
+    expect(
+      find.text('Programming'),
+      findsExactly(2),
+    ); //one on HomeScreen, one on SkillsScreen
     expect(find.text('Flutter'), findsOneWidget);
   });
 
@@ -184,8 +186,10 @@ void main() {
     expect(find.text('JavaScript'), findsOneWidget);
 
     // Verify time and session info (with bullet point format)
-    expect(find.text('1h 0m • 5 sessions'), findsOneWidget);
-    expect(find.text('2h 0m • 10 sessions'), findsOneWidget);
+    expect(find.text('1h 0m'), findsOneWidget);
+    expect(find.text('5 sessions'), findsOneWidget);
+    expect(find.text('2h 0m'), findsOneWidget);
+    expect(find.text('10 sessions'), findsOneWidget);
   });
 
   testWidgets('Empty state shows when no skills in category', (
@@ -209,9 +213,6 @@ void main() {
 
     // Verify empty state is displayed (since category ID '999' has no skills)
     expect(find.text('No skills in Empty Category yet'), findsOneWidget);
-    expect(
-      find.text('Tap the + button to add your first skill'),
-      findsOneWidget,
-    );
+    expect(find.text('Add First Skill'), findsOneWidget);
   });
 }
