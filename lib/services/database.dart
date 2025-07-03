@@ -20,7 +20,7 @@ class DBProvider {
 
   Future<Database> _initDB() async {
     // Define the path to the database
-    String path = '${await getDatabasesPath()}skill_timer.db';
+    String path = '${await getDatabasesPath()}/skill_timer.db';
 
     // Open the database with version and onCreate callback
     return await openDatabase(
