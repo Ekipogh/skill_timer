@@ -1,4 +1,4 @@
-package com.example.skill_timer
+package ru.ekipogh.skill_timer
 
 import io.flutter.embedding.android.FlutterActivity
 

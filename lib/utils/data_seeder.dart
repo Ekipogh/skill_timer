@@ -3,7 +3,6 @@ import 'package:sqflite/sqlite_api.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../services/database.dart';
-import '../utils/constants.dart';
 
 class DataSeeder {
   static final DBProvider _dbProvider = DBProvider();
@@ -12,14 +11,6 @@ class DataSeeder {
   static Future<void> seedSampleData() async {
     _cachedDatabase ??= await _dbProvider.database;
     final db = _cachedDatabase!;
-
-    final dbVersion = await db.getVersion();
-    final dbVersionConfig = AppConstants.databaseVersion;
-    // if database version doesn't config, drop all tables
-    if (dbVersion < dbVersionConfig) {
-      await DBProvider.resetDatabase();
-      _cachedDatabase = await _dbProvider.database; // Reinitialize after reset
-    }
 
     await seedCategories(db);
     await seedSkills(db);
@@ -80,32 +71,32 @@ class DataSeeder {
         name: 'Flutter Development',
         description: 'Building mobile apps with Flutter',
         category: '1',
-        totalTimeSpent: 3600, // 1 hour in seconds
-        sessionsCount: 5,
+        totalTimeSpent: 0,
+        sessionsCount: 0,
       ),
       Skill(
         id: '2',
         name: 'Spanish Language',
         description: 'Learning Spanish for travel and communication',
         category: '2',
-        totalTimeSpent: 7200, // 2 hours in seconds
-        sessionsCount: 10,
+        totalTimeSpent: 0,
+        sessionsCount: 0,
       ),
       Skill(
         id: '3',
         name: 'Guitar Playing',
         description: 'Practicing guitar chords and songs',
         category: '3',
-        totalTimeSpent: 5400, // 1.5 hours in seconds
-        sessionsCount: 8,
+        totalTimeSpent: 0,
+        sessionsCount: 0,
       ),
       Skill(
         id: '4',
         name: 'Digital Painting',
         description: 'Creating digital art using Procreate',
         category: '4',
-        totalTimeSpent: 1800, // 30 minutes in seconds
-        sessionsCount: 3,
+        totalTimeSpent: 0,
+        sessionsCount: 0,
       ),
     ];
 
