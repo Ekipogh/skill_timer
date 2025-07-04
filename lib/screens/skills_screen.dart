@@ -391,7 +391,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
                 ),
               ),
             ),
-            DraggableIndicator(key: Key('dragable_icon_${skill.id}')),
+            DraggableIndicator(key: Key('draggable_icon_${skill.id}')),
           ],
         ),
       ),
