@@ -18,7 +18,7 @@ class TimerScreen extends StatefulWidget {
 class _TimerScreenState extends State<TimerScreen> {
   late final Stopwatch _stopwatch = Stopwatch();
   Timer? _timer;
-  final int _refreshRate = 10; // Update every 10 milliseconds
+  final int _refreshRate = 100; // Update every 100 milliseconds
   String _elapsedTime = '00:00:00.000';
   bool _sessionSaved = true;
 
