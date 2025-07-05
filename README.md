@@ -1,16 +1,6 @@
-# skill_timer
+# Skill Timer
+Heard of a 10000 hours rule? To become a master of a skill you should practice it for 10,000 hours. This app will help you track the time you spent on a skill.
 
-A new Flutter project.
+Create or select a skill, like "Learning Japanesse", press a timer button and do some practice. When done, save the session to add to overall time.
 
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+<img src="imgs/screen_rec.gif" widhth=428 height=768>
