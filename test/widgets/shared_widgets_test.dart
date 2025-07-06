@@ -107,7 +107,7 @@ void main() {
       expect(buttonPressed, isTrue);
     });
 
-    testWidgets('TimeFormatter formats time correctly', (WidgetTester tester) async {
+    test('TimeFormatter formats time correctly', () {
       expect(TimeFormatter.format(0), equals('0s'));
       expect(TimeFormatter.format(30), equals('30s'));
       expect(TimeFormatter.format(60), equals('1m'));
