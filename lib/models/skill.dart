@@ -15,7 +15,6 @@ class Skill {
     this.sessionsCount = 0,
   });
 
-
   Map<String, dynamic> toMap() {
     return {
       'id': id,

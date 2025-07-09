@@ -205,9 +205,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
           id: skill.id,
           name: name,
           description: description,
-          category: skill.category,
-          totalTimeSpent: skill.totalTimeSpent,
-          sessionsCount: skill.sessionsCount,
+          category: skill.category
         );
         context.read<SkillProvider>().updateSkill(updatedSkill);
       },
