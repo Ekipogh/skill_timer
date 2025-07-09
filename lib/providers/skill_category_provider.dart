@@ -179,7 +179,28 @@ class SkillProvider extends ChangeNotifier {
       final db = await DBProvider().database;
       final List<Map<String, dynamic>> maps = await db.query('skills');
 
-      _skills = maps.map((map) => Skill.fromJson(map)).toList();
+      // load sessions
+      final List<Map<String, dynamic>> sessionMaps = await db.query(
+        'timer_sessions',
+      );
+
+      _skills = maps.map((map) {
+        final skillId = map['id'] as String;
+        final totalTimeSpent = sessionMaps
+            .where((session) => session['skill_id'] == skillId)
+            .fold(0, (sum, session) => sum + (session['duration'] as int));
+        final sessionsCount = sessionMaps
+            .where((session) => session['skill_id'] == skillId)
+            .length;
+        return Skill(
+          id: map['id'],
+          name: map['name'],
+          description: map['description'],
+          category: map['category'],
+          totalTimeSpent: totalTimeSpent,
+          sessionsCount: sessionsCount,
+        );
+      }).toList();
     } catch (e) {
       _setError('Failed to load skills: ${e.toString()}');
     }

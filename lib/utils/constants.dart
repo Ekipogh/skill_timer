@@ -3,10 +3,20 @@ import 'package:flutter/material.dart';
 class AppConstants {
   // App info
   static const String appName = 'Skill Timer';
-  static const String appVersion = '1.0.0';
+  static const String appVersion = '0.1.0-dev'; // Mark as development version
 
-  // Database version
+  // Development mode flag
+  static const bool isDevelopmentMode = true; // Set to false for production
+
+  // Database version - increment this when you add new migrations
   static const int databaseVersion = 1;
+
+  // Database migration history (for documentation)
+  static const Map<int, String> migrationHistory = {
+    1: 'Initial schema with skill_categories and skills tables',
+    // 2: 'Add timer_sessions table for detailed session tracking',
+    // 3: 'Add user_preferences table and skill colors',
+  };
 }
 
 class AppColors {
