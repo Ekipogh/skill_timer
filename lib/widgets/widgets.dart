@@ -3,6 +3,7 @@ export 'background.dart';
 export 'draggable.dart';
 
 // Custom UI Components
+export 'app_drawer.dart';
 export 'custom_app_bar.dart';
 export 'custom_cards.dart';
 export 'custom_dialogs.dart';

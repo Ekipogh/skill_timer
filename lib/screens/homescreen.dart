@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:skill_timer/widgets/dev_database_utils.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill_category.dart';
 import '../widgets/widgets.dart';
@@ -168,29 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
-      endDrawer: Drawer(
-        child: ListView(
-          padding: EdgeInsets.zero,
-          children: [
-            const DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
-              child: Text('Skill Timer'),
-            ),
-            ListTile(
-              leading: const Icon(Icons.info_outline),
-              title: const Text('Debug Screen'),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => const DevDatabaseUtils(),
-                  ),
-                );
-              },
-            ),
-          ],
-        ),
-      ),
+      endDrawer: const AppDrawer(),
     );
   }
 
