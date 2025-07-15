@@ -20,9 +20,7 @@ class Skill {
       'id': id,
       'name': name,
       'description': description,
-      'category': category,
-      'totalTimeSpent': totalTimeSpent,
-      'sessionsCount': sessionsCount,
+      'category': category
     };
   }
 

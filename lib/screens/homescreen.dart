@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/widgets/dev_database_utils.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill_category.dart';
 import '../widgets/widgets.dart';
@@ -87,7 +88,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Load skill categories when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SkillProvider>().loadSkillCategories();
+      context.read<SkillProvider>().refresh();
     });
   }
 
@@ -103,6 +104,15 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<SkillProvider>().refresh();
             },
             tooltip: 'Refresh',
+          ),
+          Builder(
+            builder: (context) => CustomIconButton(
+              icon: Icons.menu,
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              tooltip: 'Menu',
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -129,7 +139,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return EmptyStateCard(
               icon: Icons.school_outlined,
               title: 'No skill categories yet',
-              subtitle: 'Create your first skill category to start tracking your learning journey',
+              subtitle:
+                  'Create your first skill category to start tracking your learning journey',
               buttonText: 'Add First Category',
               onButtonPressed: _addNewSkillCategory,
             );
@@ -156,6 +167,29 @@ class _HomeScreenState extends State<HomeScreen> {
         tooltip: 'Add Skill Category',
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
+      ),
+      endDrawer: Drawer(
+        child: ListView(
+          padding: EdgeInsets.zero,
+          children: [
+            const DrawerHeader(
+              decoration: BoxDecoration(color: Colors.blue),
+              child: Text('Skill Timer'),
+            ),
+            ListTile(
+              leading: const Icon(Icons.info_outline),
+              title: const Text('Debug Screen'),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const DevDatabaseUtils(),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
       ),
     );
   }

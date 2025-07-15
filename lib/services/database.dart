@@ -67,15 +67,6 @@ class DBProvider {
       case 1:
         await _migrationV1(db);
         break;
-      case 2:
-        await _migrationV2(db);
-        break;
-      case 3:
-        await _migrationV3(db);
-        break;
-      case 4:
-        await _migrationV4(db);
-        break;
       // Add new migrations here as you update your schema
       default:
         throw Exception('Unknown migration version: $version');
@@ -86,6 +77,7 @@ class DBProvider {
   Future<void> _migrationV1(Database db) async {
     print('Running migration V1: Initial schema');
 
+    // Categories table
     await db.execute('''
       CREATE TABLE skill_categories (
         id TEXT PRIMARY KEY,
@@ -95,6 +87,7 @@ class DBProvider {
       )
     ''');
 
+    // Skills table
     await db.execute('''
       CREATE TABLE skills (
         id TEXT PRIMARY KEY,
@@ -102,89 +95,30 @@ class DBProvider {
         description TEXT,
         iconPath TEXT,
         category TEXT NOT NULL,
-        totalTimeSpent INTEGER DEFAULT 0,
-        sessionsCount INTEGER DEFAULT 0,
         FOREIGN KEY (category) REFERENCES skill_categories (id) ON DELETE CASCADE
+      )
+    ''');
+
+    // Sessions table
+    await db.execute('''
+      CREATE TABLE timer_sessions (
+        id TEXT PRIMARY KEY,
+        skillId TEXT NOT NULL,
+        duration INTEGER NOT NULL,
+        datePerformed TEXT NOT NULL,
+        FOREIGN KEY (skillId) REFERENCES skills (id) ON DELETE CASCADE
       )
     ''');
 
     // Create indexes for better performance
     await db.execute('CREATE INDEX idx_skills_category ON skills(category)');
     await db.execute(
-      'CREATE INDEX idx_skills_totalTime ON skills(totalTimeSpent)',
-    );
-  }
-
-  /// Migration V2: Add timer sessions table (example future migration)
-  Future<void> _migrationV2(Database db) async {
-    print('Running migration V2: Add timer sessions table');
-
-    await db.execute('''
-      CREATE TABLE timer_sessions (
-        id TEXT PRIMARY KEY,
-        skill_id TEXT NOT NULL,
-        duration INTEGER NOT NULL,
-        datePerformed TEXT NOT NULL,
-        FOREIGN KEY (skill_id) REFERENCES skills (id) ON DELETE CASCADE
-      )
-    ''');
-
-    await db.execute(
-      'CREATE INDEX idx_sessions_skill ON timer_sessions(skill_id)',
+      'CREATE INDEX idx_timer_sessions_skillId ON timer_sessions(skillId)',
     );
     await db.execute(
-      'CREATE INDEX idx_sessions_date ON timer_sessions(datePerformed)',
+      'CREATE INDEX idx_timer_sessions_date ON timer_sessions(datePerformed)',
     );
   }
-
-  /// Migration V3: Add user preferences table (example future migration)
-  Future<void> _migrationV3(Database db) async {
-    print('Running migration V3: Add user preferences');
-
-    await db.execute('''
-      CREATE TABLE user_preferences (
-        key TEXT PRIMARY KEY,
-        value TEXT NOT NULL,
-        updated_at INTEGER DEFAULT (strftime('%s', 'now'))
-      )
-    ''');
-
-    // Add new column to existing table (example of schema modification)
-    await db.execute(
-      'ALTER TABLE skills ADD COLUMN color TEXT DEFAULT "#2196F3"',
-    );
-  }
-
-  // Migration V4: Moving session data from skills to timer_sessions
-  Future<void> _migrationV4(Database db) async {
-    print(
-      'Running migration V4: Moving session data from skills to timer_sessions',
-    );
-    // for every skill, create a session entry
-    final skills = await db.query('skills');
-    for (final skill in skills) {
-      final skillId = skill['id'] as String;
-      final totalTimeSpent = skill['totalTimeSpent'] as int;
-      final sessionsCount = skill['sessionsCount'] as int;
-
-      // Create a session entry for each skill
-      for (int i = 0; i < sessionsCount; i++) {
-        await db.insert('timer_sessions', {
-          'id': '${skillId}_session_$i',
-          'skill_id': skillId,
-          'duration': totalTimeSpent ~/ sessionsCount,
-          'datePerformed': DateTime.now().toIso8601String(),
-        });
-      }
-      // alter skills table to remove session data
-      await db.execute('''
-        ALTER TABLE skills
-        DROP COLUMN totalTimeSpent,
-        DROP COLUMN sessionsCount
-      ''');
-    }
-  }
-  //
 
   /// Recreate database (used for downgrade or reset)
   Future<void> _recreateDatabase(Database db, int version) async {

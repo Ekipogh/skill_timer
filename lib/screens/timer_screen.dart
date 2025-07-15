@@ -172,12 +172,15 @@ class _TimerScreenState extends State<TimerScreen> {
             final skillProvider = context.read<SkillProvider>();
 
             try {
-              final updatedSkill = widget.skill.copyWith(
-                totalTimeSpent: widget.skill.totalTimeSpent + _stopwatch.elapsed.inSeconds,
-                sessionsCount: widget.skill.sessionsCount + 1,
-              );
+              // create a new session record
+              final session = {
+                'id': DateTime.now().millisecondsSinceEpoch.toString(),
+                'skillId': widget.skill.id,
+                'duration': _stopwatch.elapsed.inSeconds,
+                'datePerformed': DateTime.now().toIso8601String(),
+              };
 
-              await skillProvider.updateSkill(updatedSkill);
+              await skillProvider.addSession(session);
               _sessionSaved = true;
 
               if (context.mounted) {

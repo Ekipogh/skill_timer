@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:skill_timer/models/learning_session.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../services/database.dart';
@@ -6,6 +9,7 @@ import '../services/database.dart';
 class SkillProvider extends ChangeNotifier {
   List<SkillCategory> _skillCategories = [];
   List<Skill> _skills = [];
+  List<TimerSession> _timerSessions = [];
   bool _isLoading = false;
   String? _error;
 
@@ -41,13 +45,36 @@ class SkillProvider extends ChangeNotifier {
             ),
           )
           .toList();
-
-      // Also load skills when loading categories
-      await loadSkills();
-
-      notifyListeners();
     } catch (e) {
       _setError('Failed to load skill categories: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Load timer sessions from database
+  Future<void> loadSessions() async {
+    if (_isLoading) return; // Prevent multiple simultaneous loads
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      final List<Map<String, dynamic>> maps = await db.query('timer_sessions');
+
+      _timerSessions = maps
+          .map(
+            (map) => TimerSession(
+              id: map['id'],
+              skillId: map['skillId'],
+              duration: map['duration'],
+              datePerformed: DateTime.parse(map['datePerformed']),
+            ),
+          )
+          .toList();
+    } catch (e) {
+      _setError('Failed to load timer sessions: ${e.toString()}');
     } finally {
       _setLoading(false);
     }
@@ -122,7 +149,10 @@ class SkillProvider extends ChangeNotifier {
   Future<void> refresh() async {
     _skillCategories.clear();
     _skills.clear();
-    await loadSkillCategories(); // This will also load skills
+    await loadSkillCategories();
+    await loadSessions();
+    await loadSkills();
+    notifyListeners();
   }
 
   // Private helper methods
@@ -174,24 +204,21 @@ class SkillProvider extends ChangeNotifier {
 
   // Load skills from database
   Future<void> loadSkills() async {
+    if (_isLoading) return; // Prevent multiple simultaneous loads
     // Don't set loading state here since it's called from loadSkillCategories
     try {
       final db = await DBProvider().database;
       final List<Map<String, dynamic>> maps = await db.query('skills');
 
-      // load sessions
-      final List<Map<String, dynamic>> sessionMaps = await db.query(
-        'timer_sessions',
-      );
-
       _skills = maps.map((map) {
         final skillId = map['id'] as String;
-        final totalTimeSpent = sessionMaps
-            .where((session) => session['skill_id'] == skillId)
-            .fold(0, (sum, session) => sum + (session['duration'] as int));
-        final sessionsCount = sessionMaps
-            .where((session) => session['skill_id'] == skillId)
+        final totalTimeSpent = _timerSessions
+            .where((session) => session.skillId == skillId)
+            .fold(0, (sum, session) => sum + session.duration);
+        final sessionsCount = _timerSessions
+            .where((session) => session.skillId == skillId)
             .length;
+
         return Skill(
           id: map['id'],
           name: map['name'],
@@ -203,6 +230,8 @@ class SkillProvider extends ChangeNotifier {
       }).toList();
     } catch (e) {
       _setError('Failed to load skills: ${e.toString()}');
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -283,6 +312,36 @@ class SkillProvider extends ChangeNotifier {
       notifyListeners();
     } catch (e) {
       _setError('Failed to restore skill category: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<void> addSession(Map<String, Object> session) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.insert('timer_sessions', session);
+
+      // Update the skill's total time and session count
+      final skillId = session['skillId'] as String;
+      final skillIndex = _skills.indexWhere((s) => s.id == skillId);
+      if (skillIndex != -1) {
+        final skill = _skills[skillIndex];
+        final newTotalTime =
+            skill.totalTimeSpent + (session['duration'] as int);
+        final newSessionsCount = skill.sessionsCount + 1;
+
+        _skills[skillIndex] = skill.copyWith(
+          totalTimeSpent: newTotalTime,
+          sessionsCount: newSessionsCount,
+        );
+        notifyListeners();
+      }
+    } catch (e) {
+      _setError('Failed to add session: ${e.toString()}');
     } finally {
       _setLoading(false);
     }
