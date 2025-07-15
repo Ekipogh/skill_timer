@@ -100,6 +100,17 @@ class DevDatabaseUtils extends StatelessWidget {
                 style: TextStyle(fontSize: 12, fontStyle: FontStyle.italic),
               ),
             ),
+            // back button
+            const SizedBox(height: 8),
+            ElevatedButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.arrow_back),
+              label: const Text('Back'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.blue,
+                foregroundColor: Colors.white,
+              ),
+            ),
           ],
         ),
       ),
@@ -107,27 +118,32 @@ class DevDatabaseUtils extends StatelessWidget {
   }
 
   Future<void> _resetDatabase(BuildContext context) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Reset Database'),
-        content: const Text(
-          'This will delete ALL data and recreate the database from scratch.\n\n'
-          'This is safe during development but will lose any test data you\'ve entered.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+    final confirmed =
+        await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            title: const Text('Reset Database'),
+            content: const Text(
+              'This will delete ALL data and recreate the database from scratch.\n\n'
+              'This is safe during development but will lose any test data you\'ve entered.',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                child: const Text(
+                  'Reset',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           ),
-          ElevatedButton(
-            onPressed: () => Navigator.pop(context, true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-            child: const Text('Reset', style: TextStyle(color: Colors.white)),
-          ),
-        ],
-      ),
-    ) ?? false;
+        ) ??
+        false;
 
     if (confirmed && context.mounted) {
       try {
@@ -194,12 +210,17 @@ class DevDatabaseUtils extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text('Tables:', style: TextStyle(fontWeight: FontWeight.bold)),
+                  Text(
+                    'Tables:',
+                    style: TextStyle(fontWeight: FontWeight.bold),
+                  ),
                   const SizedBox(height: 8),
-                  ...schema.map((table) => Padding(
-                    padding: const EdgeInsets.only(left: 16, bottom: 4),
-                    child: Text('• ${table['name']}'),
-                  )),
+                  ...schema.map(
+                    (table) => Padding(
+                      padding: const EdgeInsets.only(left: 16, bottom: 4),
+                      child: Text('• ${table['name']}'),
+                    ),
+                  ),
                 ],
               ),
             ),
