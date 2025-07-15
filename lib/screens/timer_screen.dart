@@ -97,7 +97,7 @@ class _TimerScreenState extends State<TimerScreen> {
                   IconCard(
                     icon: Icons.psychology,
                     iconColor: colorScheme.primary,
-                    iconBackgroundColor: colorScheme.primary.withOpacity(0.1),
+                    iconBackgroundColor: colorScheme.primary.withValues(alpha: 0.1),
                     title: widget.skill.name,
                     subtitle: widget.skill.description.isNotEmpty
                         ? widget.skill.description

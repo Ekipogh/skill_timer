@@ -17,7 +17,7 @@ class StatBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
@@ -94,7 +94,7 @@ class ActionButton extends StatelessWidget {
             foregroundColor: foregroundColor ?? Colors.white,
             shape: const CircleBorder(),
             elevation: 8,
-            shadowColor: backgroundColor?.withOpacity(0.3),
+            shadowColor: backgroundColor?.withValues(alpha: 0.3),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -254,7 +254,7 @@ class TimerDisplay extends StatelessWidget {
         borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withOpacity(0.1),
+            color: colorScheme.shadow.withValues(alpha: 0.1),
             blurRadius: 20,
             offset: const Offset(0, 10),
           ),
@@ -265,7 +265,7 @@ class TimerDisplay extends StatelessWidget {
           Text(
             'Session Time',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -295,7 +295,7 @@ class TimerDisplay extends StatelessWidget {
               Text(
                 isRunning ? 'Running' : 'Stopped',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onPrimaryContainer.withOpacity(0.8),
+                  color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -331,7 +331,7 @@ class StatsCard extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 40,
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
                 ),
             ],
           ],
@@ -379,7 +379,7 @@ class StatItem extends StatelessWidget {
         Text(
           label,
           style: theme.textTheme.bodySmall?.copyWith(
-            color: colorScheme.onSurface.withOpacity(0.7),
+            color: colorScheme.onSurface.withValues(alpha: 0.7),
           ),
         ),
       ],

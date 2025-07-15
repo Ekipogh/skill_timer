@@ -21,7 +21,7 @@ class DialogTitleRow extends StatelessWidget {
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: backgroundColor ?? (iconColor ?? Colors.blue).withOpacity(0.1),
+            color: backgroundColor ?? (iconColor ?? Colors.blue).withValues(alpha: 0.1),
             borderRadius: BorderRadius.circular(8),
           ),
           child: Icon(
@@ -58,7 +58,7 @@ class InfoContainer extends StatelessWidget {
     return Container(
       padding: padding ?? const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: borderRadius ?? BorderRadius.circular(8),
       ),
       child: Row(
@@ -69,7 +69,7 @@ class InfoContainer extends StatelessWidget {
             child: Text(
               text,
               style: TextStyle(
-                color: color.withOpacity(0.8),
+                color: color.withValues(alpha: 0.8),
                 fontSize: 14,
               ),
             ),

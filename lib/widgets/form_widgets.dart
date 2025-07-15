@@ -110,7 +110,7 @@ class _FormDialogState extends State<FormDialog> {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: widget.titleIconColor.withOpacity(0.1),
+              color: widget.titleIconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -178,35 +178,6 @@ class _FormDialogState extends State<FormDialog> {
           child: Text(widget.confirmText),
         ),
       ],
-    );
-  }
-
-  static Future<void> show(
-    BuildContext context, {
-    required String title,
-    required IconData titleIcon,
-    required List<FormField> fields,
-    required Function(Map<String, String>) onConfirm,
-    Color titleIconColor = Colors.blue,
-    String confirmText = 'Save',
-    String cancelText = 'Cancel',
-    Color? confirmColor,
-    Widget? additionalInfo,
-  }) {
-    return showDialog(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => FormDialog(
-        title: title,
-        titleIcon: titleIcon,
-        fields: fields,
-        onConfirm: onConfirm,
-        titleIconColor: titleIconColor,
-        confirmText: confirmText,
-        cancelText: cancelText,
-        confirmColor: confirmColor,
-        additionalInfo: additionalInfo,
-      ),
     );
   }
 }

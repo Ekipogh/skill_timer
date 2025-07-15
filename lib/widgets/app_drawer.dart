@@ -41,7 +41,7 @@ class AppDrawer extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             Theme.of(context).colorScheme.primary,
-            Theme.of(context).colorScheme.primary.withOpacity(0.8),
+            Theme.of(context).colorScheme.primary.withValues(alpha: 0.8),
           ],
         ),
       ),
@@ -56,7 +56,7 @@ class AppDrawer extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white.withOpacity(0.2),
+                      color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Icon(
@@ -84,7 +84,7 @@ class AppDrawer extends StatelessWidget {
                               ?.copyWith(
                                 color: Theme.of(
                                   context,
-                                ).colorScheme.onPrimary.withOpacity(0.9),
+                                ).colorScheme.onPrimary.withValues(alpha: 0.9),
                               ),
                         ),
                       ],
@@ -144,7 +144,7 @@ class AppDrawer extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary.withOpacity(0.8),
+            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -265,8 +265,8 @@ class AppDrawer extends StatelessWidget {
         padding: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: enabled
-              ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-              : Colors.grey.withOpacity(0.1),
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.1)
+              : Colors.grey.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
@@ -288,8 +288,8 @@ class AppDrawer extends StatelessWidget {
         subtitle,
         style: TextStyle(
           color: enabled
-              ? Theme.of(context).colorScheme.onSurface.withOpacity(0.7)
-              : Colors.grey.withOpacity(0.7),
+              ? Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.7)
+              : Colors.grey.withValues(alpha: 0.7),
           fontSize: 12,
         ),
       ),
@@ -312,14 +312,14 @@ class AppDrawer extends StatelessWidget {
           Icon(
             Icons.info_outline,
             size: 16,
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Skill Timer v1.0.0',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ),

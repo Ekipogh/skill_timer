@@ -86,7 +86,7 @@ class CustomIconButton extends StatelessWidget {
       onPressed: onPressed,
       tooltip: tooltip,
       style: IconButton.styleFrom(
-        backgroundColor: backgroundColor ?? colorScheme.onPrimary.withOpacity(0.1),
+        backgroundColor: backgroundColor ?? colorScheme.onPrimary.withValues(alpha: 0.1),
         foregroundColor: foregroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),

@@ -69,7 +69,7 @@ void main() {
               title: 'Test Card',
               subtitle: 'Test Description',
               iconColor: Colors.blue,
-              iconBackgroundColor: Colors.blue.withOpacity(0.1),
+              iconBackgroundColor: Colors.blue.withValues(alpha: 0.1),
             ),
           ),
         ),
