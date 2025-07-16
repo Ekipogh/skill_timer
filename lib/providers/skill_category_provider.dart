@@ -9,7 +9,7 @@ import '../services/database.dart';
 class SkillProvider extends ChangeNotifier {
   List<SkillCategory> _skillCategories = [];
   List<Skill> _skills = [];
-  List<TimerSession> _timerSessions = [];
+  List<LearningSession> _learningSessions = [];
   bool _isLoading = false;
   String? _error;
 
@@ -17,6 +17,8 @@ class SkillProvider extends ChangeNotifier {
   List<SkillCategory> get skillCategories =>
       List.unmodifiable(_skillCategories);
   List<Skill> get skills => List.unmodifiable(_skills);
+  List<LearningSession> get learningSessions =>
+      List.unmodifiable(_learningSessions);
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasError => _error != null;
@@ -63,9 +65,9 @@ class SkillProvider extends ChangeNotifier {
       final db = await DBProvider().database;
       final List<Map<String, dynamic>> maps = await db.query('timer_sessions');
 
-      _timerSessions = maps
+      _learningSessions = maps
           .map(
-            (map) => TimerSession(
+            (map) => LearningSession(
               id: map['id'],
               skillId: map['skillId'],
               duration: map['duration'],
@@ -212,10 +214,10 @@ class SkillProvider extends ChangeNotifier {
 
       _skills = maps.map((map) {
         final skillId = map['id'] as String;
-        final totalTimeSpent = _timerSessions
+        final totalTimeSpent = _learningSessions
             .where((session) => session.skillId == skillId)
             .fold(0, (sum, session) => sum + session.duration);
-        final sessionsCount = _timerSessions
+        final sessionsCount = _learningSessions
             .where((session) => session.skillId == skillId)
             .length;
 
@@ -345,5 +347,55 @@ class SkillProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  // Helper methods for session filtering and analysis
+  List<LearningSession> getSessionsForMonth(DateTime month) {
+    return _learningSessions.where((session) {
+      return session.datePerformed.year == month.year &&
+          session.datePerformed.month == month.month;
+    }).toList();
+  }
+
+  List<LearningSession> getSessionsForSkill(String skillId) {
+    return _learningSessions.where((session) => session.skillId == skillId).toList();
+  }
+
+  List<LearningSession> getSessionsForDateRange(DateTime startDate, DateTime endDate) {
+    return _learningSessions.where((session) {
+      return session.datePerformed.isAfter(startDate.subtract(const Duration(days: 1))) &&
+          session.datePerformed.isBefore(endDate.add(const Duration(days: 1)));
+    }).toList();
+  }
+
+  int getTotalTimeForMonth(DateTime month) {
+    return getSessionsForMonth(month)
+        .fold(0, (sum, session) => sum + session.duration);
+  }
+
+  int getTotalSessionsForMonth(DateTime month) {
+    return getSessionsForMonth(month).length;
+  }
+
+  Map<String, int> getSkillTimeBreakdownForMonth(DateTime month) {
+    final sessions = getSessionsForMonth(month);
+    final Map<String, int> breakdown = {};
+
+    for (var session in sessions) {
+      final skill = _skills.firstWhere(
+        (s) => s.id == session.skillId,
+        orElse: () => Skill(
+          id: session.skillId,
+          name: 'Unknown Skill',
+          description: '',
+          category: '',
+          totalTimeSpent: 0,
+          sessionsCount: 0,
+        ),
+      );
+      breakdown[skill.name] = (breakdown[skill.name] ?? 0) + session.duration;
+    }
+
+    return breakdown;
   }
 }

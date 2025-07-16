@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/screens/session_report.dart';
 import '../providers/skill_category_provider.dart';
 import '../widgets/dev_database_utils.dart';
 import '../widgets/widgets.dart';
@@ -334,9 +335,7 @@ class AppDrawer extends StatelessWidget {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const Scaffold(
-          body: Center(child: Text('Sessions Report not implemented yet')),
-        ),
+        builder: (context) => const SessionReport(),
       ),
     );
   }

@@ -1,10 +1,10 @@
-class TimerSession {
+class LearningSession {
   final String id;
   final String skillId;
   final DateTime datePerformed;
   final int duration; // Duration in seconds
 
-  TimerSession({
+  LearningSession({
     required this.id,
     required this.skillId,
     required this.datePerformed,
@@ -22,16 +22,16 @@ class TimerSession {
 
   @override
   String toString() {
-    return 'TimerSession(id: $id, skillId: $skillId, datePerformed: $datePerformed, duration: $duration)';
+    return 'LearningSession(id: $id, skillId: $skillId, datePerformed: $datePerformed, duration: $duration)';
   }
 
-  TimerSession copyWith({
+  LearningSession copyWith({
     String? id,
     String? skillId,
     DateTime? datePerformed,
     int? duration,
   }) {
-    return TimerSession(
+    return LearningSession(
       id: id ?? this.id,
       skillId: skillId ?? this.skillId,
       datePerformed: datePerformed ?? this.datePerformed,

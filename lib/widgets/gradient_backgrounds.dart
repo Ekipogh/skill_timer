@@ -76,34 +76,38 @@ class ScaffoldWithGradient extends StatelessWidget {
 }
 
 class TimerGradientBackground extends GradientBackground {
-  const TimerGradientBackground({
-    required super.child,
-    super.key,
-  }) : super(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.3],
-        );
+  const TimerGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.3],
+      );
 }
 
 class SkillsGradientBackground extends GradientBackground {
-  const SkillsGradientBackground({
-    required super.child,
-    super.key,
-  }) : super(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.2],
-        );
+  const SkillsGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2],
+      );
 }
 
 class HomeGradientBackground extends GradientBackground {
-  const HomeGradientBackground({
-    required super.child,
-    super.key,
-  }) : super(
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.2],
-        );
+  const HomeGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2],
+      );
+}
+
+class SessionReportGradientBackground extends GradientBackground {
+  const SessionReportGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        colors: const [Colors.white, Colors.white],
+        stops: const [0.0, 0.2],
+      );
 }
