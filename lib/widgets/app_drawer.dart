@@ -35,7 +35,6 @@ class AppDrawer extends StatelessWidget {
 
   Widget _buildDrawerHeader(BuildContext context) {
     return Container(
-      height: 180,
       decoration: BoxDecoration(
         gradient: LinearGradient(
           begin: Alignment.topLeft,
@@ -50,6 +49,7 @@ class AppDrawer extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(16.0),
           child: Column(
+            mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
@@ -93,7 +93,7 @@ class AppDrawer extends StatelessWidget {
                   ),
                 ],
               ),
-              const Spacer(),
+              const SizedBox(height: 20),
               Consumer<SkillProvider>(
                 builder: (context, provider, child) {
                   final totalCategories = provider.skillCategories.length;
@@ -145,7 +145,9 @@ class AppDrawer extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8),
+            color: Theme.of(
+              context,
+            ).colorScheme.onPrimary.withValues(alpha: 0.8),
           ),
         ),
       ],
@@ -313,14 +315,18 @@ class AppDrawer extends StatelessWidget {
           Icon(
             Icons.info_outline,
             size: 16,
-            color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+            color: Theme.of(
+              context,
+            ).colorScheme.onSurface.withValues(alpha: 0.6),
           ),
           const SizedBox(width: 8),
           Expanded(
             child: Text(
               'Skill Timer v1.0.0',
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
           ),
@@ -334,9 +340,7 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(
-        builder: (context) => const SessionReport(),
-      ),
+      MaterialPageRoute(builder: (context) => const SessionReport()),
     );
   }
 

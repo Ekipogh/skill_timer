@@ -230,10 +230,11 @@ class DBProvider {
 
   /// Check if we're in development mode and can safely reset
   static bool get canSafelyReset {
+    const int stableVersion = 2; // First stable release version
     // Add your conditions here - version checks, build mode, etc.
     return AppConstants.appVersion.contains('dev') ||
         AppConstants.appVersion.startsWith('0.') ||
-        AppConstants.databaseVersion < 2; // Before first stable release
+        AppConstants.databaseVersion < stableVersion; // Before first stable release
   }
 
   /// Safe development reset with checks

@@ -107,7 +107,6 @@ class SessionReportGradientBackground extends GradientBackground {
     : super(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        colors: const [Colors.white, Colors.white],
         stops: const [0.0, 0.2],
       );
 }

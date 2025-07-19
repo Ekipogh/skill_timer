@@ -47,8 +47,8 @@ class MigrationUtils {
   static Future<int> getDatabaseSize() async {
     try {
       final dbPath = '${await getDatabasesPath()}/skill_timer.db';
-      final file = await File(dbPath).stat();
-      return file.size;
+      final fileSize = await File(dbPath).length();
+      return fileSize;
     } catch (e) {
       return 0;
     }
