@@ -42,6 +42,7 @@ class ScaffoldWithGradient extends StatelessWidget {
   final FloatingActionButtonLocation? floatingActionButtonLocation;
   final List<Color>? gradientColors;
   final List<double>? gradientStops;
+  final Widget? endDrawer;
 
   const ScaffoldWithGradient({
     required this.body,
@@ -51,6 +52,7 @@ class ScaffoldWithGradient extends StatelessWidget {
     this.gradientColors,
     this.gradientStops,
     super.key,
+    this.endDrawer,
   });
 
   @override
@@ -68,42 +70,43 @@ class ScaffoldWithGradient extends StatelessWidget {
         stops: gradientStops,
         child: body,
       ),
+      endDrawer: endDrawer,
     );
   }
 }
 
 class TimerGradientBackground extends GradientBackground {
-  const TimerGradientBackground({
-    required Widget child,
-    super.key,
-  }) : super(
-          child: child,
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.3],
-        );
+  const TimerGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.3],
+      );
 }
 
 class SkillsGradientBackground extends GradientBackground {
-  const SkillsGradientBackground({
-    required Widget child,
-    super.key,
-  }) : super(
-          child: child,
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.2],
-        );
+  const SkillsGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2],
+      );
 }
 
 class HomeGradientBackground extends GradientBackground {
-  const HomeGradientBackground({
-    required Widget child,
-    super.key,
-  }) : super(
-          child: child,
-          begin: Alignment.topCenter,
-          end: Alignment.bottomCenter,
-          stops: const [0.0, 0.2],
-        );
+  const HomeGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2],
+      );
+}
+
+class SessionReportGradientBackground extends GradientBackground {
+  const SessionReportGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2],
+      );
 }

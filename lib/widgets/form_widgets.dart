@@ -36,9 +36,7 @@ class CustomTextField extends StatelessWidget {
       decoration: InputDecoration(
         labelText: labelText,
         hintText: hintText,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-        ),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
         prefixIcon: prefixIcon != null ? Icon(prefixIcon) : null,
       ),
       textCapitalization: textCapitalization,
@@ -102,15 +100,13 @@ class _FormDialogState extends State<FormDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       title: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: widget.titleIconColor.withOpacity(0.1),
+              color: widget.titleIconColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Icon(
@@ -126,17 +122,19 @@ class _FormDialogState extends State<FormDialog> {
       content: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          ...widget.fields.map((field) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: CustomTextField(
-                  controller: controllers[field.key]!,
-                  labelText: field.label,
-                  prefixIcon: field.icon,
-                  maxLines: field.maxLines,
-                  textCapitalization: field.textCapitalization,
-                  hintText: field.hintText,
-                ),
-              )),
+          ...widget.fields.map(
+            (field) => Padding(
+              padding: const EdgeInsets.only(bottom: 16),
+              child: CustomTextField(
+                controller: controllers[field.key]!,
+                labelText: field.label,
+                prefixIcon: field.icon,
+                maxLines: field.maxLines,
+                textCapitalization: field.textCapitalization,
+                hintText: field.hintText,
+              ),
+            ),
+          ),
           if (widget.additionalInfo != null) ...[
             const SizedBox(height: 8),
             widget.additionalInfo!,
@@ -237,10 +235,7 @@ class FormField {
 class AddSkillDialog extends StatelessWidget {
   final Function(String name, String description) onConfirm;
 
-  const AddSkillDialog({
-    required this.onConfirm,
-    super.key,
-  });
+  const AddSkillDialog({required this.onConfirm, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -351,10 +346,7 @@ class EditSkillDialog extends StatelessWidget {
 class AddCategoryDialog extends StatelessWidget {
   final Function(String name, String description) onConfirm;
 
-  const AddCategoryDialog({
-    required this.onConfirm,
-    super.key,
-  });
+  const AddCategoryDialog({required this.onConfirm, super.key});
 
   @override
   Widget build(BuildContext context) {

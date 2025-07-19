@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Load skill categories when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SkillProvider>().loadSkillCategories();
+      context.read<SkillProvider>().refresh();
     });
   }
 
@@ -103,6 +103,15 @@ class _HomeScreenState extends State<HomeScreen> {
               context.read<SkillProvider>().refresh();
             },
             tooltip: 'Refresh',
+          ),
+          Builder(
+            builder: (context) => CustomIconButton(
+              icon: Icons.menu,
+              onPressed: () {
+                Scaffold.of(context).openEndDrawer();
+              },
+              tooltip: 'Menu',
+            ),
           ),
           const SizedBox(width: 8),
         ],
@@ -129,7 +138,8 @@ class _HomeScreenState extends State<HomeScreen> {
             return EmptyStateCard(
               icon: Icons.school_outlined,
               title: 'No skill categories yet',
-              subtitle: 'Create your first skill category to start tracking your learning journey',
+              subtitle:
+                  'Create your first skill category to start tracking your learning journey',
               buttonText: 'Add First Category',
               onButtonPressed: _addNewSkillCategory,
             );
@@ -157,6 +167,7 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: Theme.of(context).colorScheme.primary,
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
+      endDrawer: const AppDrawer(),
     );
   }
 
@@ -195,7 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             onTap: () => _onSkillCategoryTap(skillCategory),
@@ -221,7 +232,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(Icons.delete, color: Colors.red, size: 24),
@@ -241,7 +252,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Row(

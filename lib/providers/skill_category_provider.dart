@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
+import 'package:skill_timer/models/learning_session.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../services/database.dart';
@@ -6,6 +9,7 @@ import '../services/database.dart';
 class SkillProvider extends ChangeNotifier {
   List<SkillCategory> _skillCategories = [];
   List<Skill> _skills = [];
+  List<LearningSession> _learningSessions = [];
   bool _isLoading = false;
   String? _error;
 
@@ -13,6 +17,8 @@ class SkillProvider extends ChangeNotifier {
   List<SkillCategory> get skillCategories =>
       List.unmodifiable(_skillCategories);
   List<Skill> get skills => List.unmodifiable(_skills);
+  List<LearningSession> get learningSessions =>
+      List.unmodifiable(_learningSessions);
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasError => _error != null;
@@ -41,13 +47,36 @@ class SkillProvider extends ChangeNotifier {
             ),
           )
           .toList();
-
-      // Also load skills when loading categories
-      await loadSkills();
-
-      notifyListeners();
     } catch (e) {
       _setError('Failed to load skill categories: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Load timer sessions from database
+  Future<void> loadSessions() async {
+    if (_isLoading) return; // Prevent multiple simultaneous loads
+
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      final List<Map<String, dynamic>> maps = await db.query('timer_sessions');
+
+      _learningSessions = maps
+          .map(
+            (map) => LearningSession(
+              id: map['id'],
+              skillId: map['skillId'],
+              duration: map['duration'],
+              datePerformed: DateTime.parse(map['datePerformed']),
+            ),
+          )
+          .toList();
+    } catch (e) {
+      _setError('Failed to load timer sessions: ${e.toString()}');
     } finally {
       _setLoading(false);
     }
@@ -122,7 +151,10 @@ class SkillProvider extends ChangeNotifier {
   Future<void> refresh() async {
     _skillCategories.clear();
     _skills.clear();
-    await loadSkillCategories(); // This will also load skills
+    await loadSkillCategories();
+    await loadSessions();
+    await loadSkills();
+    notifyListeners();
   }
 
   // Private helper methods
@@ -174,14 +206,34 @@ class SkillProvider extends ChangeNotifier {
 
   // Load skills from database
   Future<void> loadSkills() async {
+    if (_isLoading) return; // Prevent multiple simultaneous loads
     // Don't set loading state here since it's called from loadSkillCategories
     try {
       final db = await DBProvider().database;
       final List<Map<String, dynamic>> maps = await db.query('skills');
 
-      _skills = maps.map((map) => Skill.fromJson(map)).toList();
+      _skills = maps.map((map) {
+        final skillId = map['id'] as String;
+        final totalTimeSpent = _learningSessions
+            .where((session) => session.skillId == skillId)
+            .fold(0, (sum, session) => sum + session.duration);
+        final sessionsCount = _learningSessions
+            .where((session) => session.skillId == skillId)
+            .length;
+
+        return Skill(
+          id: map['id'],
+          name: map['name'],
+          description: map['description'],
+          category: map['category'],
+          totalTimeSpent: totalTimeSpent,
+          sessionsCount: sessionsCount,
+        );
+      }).toList();
     } catch (e) {
       _setError('Failed to load skills: ${e.toString()}');
+    } finally {
+      _setLoading(false);
     }
   }
 
@@ -265,5 +317,94 @@ class SkillProvider extends ChangeNotifier {
     } finally {
       _setLoading(false);
     }
+  }
+
+  Future<void> addSession(Map<String, Object> session) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final db = await DBProvider().database;
+      await db.insert('timer_sessions', session);
+
+      // Update the skill's total time and session count
+      final skillId = session['skillId'] as String;
+      final skillIndex = _skills.indexWhere((s) => s.id == skillId);
+      if (skillIndex != -1) {
+        final skill = _skills[skillIndex];
+        final newTotalTime =
+            skill.totalTimeSpent + (session['duration'] as int);
+        final newSessionsCount = skill.sessionsCount + 1;
+
+        _skills[skillIndex] = skill.copyWith(
+          totalTimeSpent: newTotalTime,
+          sessionsCount: newSessionsCount,
+        );
+        notifyListeners();
+      }
+    } catch (e) {
+      _setError('Failed to add session: ${e.toString()}');
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  // Helper methods for session filtering and analysis
+  List<LearningSession> getSessionsForMonth(DateTime month) {
+    return _learningSessions.where((session) {
+      return session.datePerformed.year == month.year &&
+          session.datePerformed.month == month.month;
+    }).toList();
+  }
+
+  List<LearningSession> getSessionsForSkill(String skillId) {
+    return _learningSessions.where((session) => session.skillId == skillId).toList();
+  }
+
+  List<LearningSession> getSessionsForDateRange(DateTime startDate, DateTime endDate) {
+    final normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
+    final normalizedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
+
+    return _learningSessions.where((session) {
+      final sessionDate = DateTime(
+        session.datePerformed.year,
+        session.datePerformed.month,
+        session.datePerformed.day,
+      );
+      return sessionDate.isAtSameMomentAs(normalizedStartDate) ||
+          sessionDate.isAtSameMomentAs(normalizedEndDate) ||
+          (sessionDate.isAfter(normalizedStartDate) && sessionDate.isBefore(normalizedEndDate));
+    }).toList();
+  }
+
+  int getTotalTimeForMonth(DateTime month) {
+    return getSessionsForMonth(month)
+        .fold(0, (sum, session) => sum + session.duration);
+  }
+
+  int getTotalSessionsForMonth(DateTime month) {
+    return getSessionsForMonth(month).length;
+  }
+
+  Map<String, int> getSkillTimeBreakdownForMonth(DateTime month) {
+    final sessions = getSessionsForMonth(month);
+    final Map<String, int> breakdown = {};
+
+    for (var session in sessions) {
+      final skill = _skills.firstWhere(
+        (s) => s.id == session.skillId,
+        orElse: () => Skill(
+          id: session.skillId,
+          name: 'Unknown Skill',
+          description: '',
+          category: '',
+          totalTimeSpent: 0,
+          sessionsCount: 0,
+        ),
+      );
+      breakdown[skill.name] = (breakdown[skill.name] ?? 0) + session.duration;
+    }
+
+    return breakdown;
   }
 }
