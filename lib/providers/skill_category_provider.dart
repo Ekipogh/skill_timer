@@ -362,9 +362,18 @@ class SkillProvider extends ChangeNotifier {
   }
 
   List<LearningSession> getSessionsForDateRange(DateTime startDate, DateTime endDate) {
+    final normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
+    final normalizedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
+
     return _learningSessions.where((session) {
-      return session.datePerformed.isAfter(startDate.subtract(const Duration(days: 1))) &&
-          session.datePerformed.isBefore(endDate.add(const Duration(days: 1)));
+      final sessionDate = DateTime(
+        session.datePerformed.year,
+        session.datePerformed.month,
+        session.datePerformed.day,
+      );
+      return sessionDate.isAtSameMomentAs(normalizedStartDate) ||
+          sessionDate.isAtSameMomentAs(normalizedEndDate) ||
+          (sessionDate.isAfter(normalizedStartDate) && sessionDate.isBefore(normalizedEndDate));
     }).toList();
   }
 
