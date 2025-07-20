@@ -111,8 +111,8 @@ void main() {
       expect(TimeFormatter.format(0), equals('0s'));
       expect(TimeFormatter.format(30), equals('30s'));
       expect(TimeFormatter.format(60), equals('1m'));
-      expect(TimeFormatter.format(90), equals('1m'));
-      expect(TimeFormatter.format(3600), equals('1h 0m'));
+      expect(TimeFormatter.format(90), equals('1m 30s'));
+      expect(TimeFormatter.format(3600), equals('1h'));
       expect(TimeFormatter.format(3660), equals('1h 1m'));
       expect(TimeFormatter.format(7320), equals('2h 2m'));
     });

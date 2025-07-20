@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
+import 'package:skill_timer/providers/skill_category_provider.dart';
 import 'package:skill_timer/utils/formatters.dart';
 import 'package:skill_timer/widgets/widgets.dart';
 
@@ -46,35 +48,6 @@ class ManualDataEntryScreen extends StatelessWidget {
     );
   }
 }
-
-// class ManualDataEntryForm extends StatelessWidget {
-//   final Skill skill;
-
-//   const ManualDataEntryForm({required this.skill, super.key});
-
-//   @override
-//   Widget build(BuildContext context) {
-//     return Card(
-//       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-//       child: Column(
-//         crossAxisAlignment: CrossAxisAlignment.start,
-//         children: [
-//           Padding(
-//             padding: const EdgeInsets.all(16.0),
-//             child: TextField(
-//               decoration: InputDecoration(
-//                 labelText: 'Enter your data',
-//                 border: OutlineInputBorder(
-//                   borderRadius: BorderRadius.circular(8),
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ],
-//       ),
-//     );
-//   }
-// }
 
 class ManualDataEntryForm extends StatefulWidget {
   final Skill skill;
@@ -245,8 +218,22 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
   }
 
   void _saveManualSession(BuildContext context) {
-    // TODO: Implement saving the manual session
-    // For now, just show a success message
+    final skillProvider = context.read<SkillProvider>();
+
+    final sessionData = {
+      "id": DateTime.now().millisecondsSinceEpoch.toString(),
+      'skillId': widget.skill.id,
+      'duration': _durationTime,
+      'datePerformed': _selectedDate!.toIso8601String(),
+    };
+
+    try {
+      skillProvider.addSession(sessionData);
+    } catch (e) {
+      CustomSnackBar.showError(context, message: 'Failed to save session: $e');
+      return;
+    }
+
     CustomSnackBar.showSuccess(
       context,
       message:
@@ -311,15 +298,15 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
                     setState(() => hours = value);
                   }),
                   const Text(
-                    ':',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    '\n:',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   _buildTimeColumn('Minutes', minutes, 59, (value) {
                     setState(() => minutes = value);
                   }),
                   const Text(
-                    ':',
-                    style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+                    '\n:',
+                    style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
                   ),
                   _buildTimeColumn('Seconds', seconds, 59, (value) {
                     setState(() => seconds = value);
@@ -338,6 +325,8 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
                     minutes = (duration % 3600) ~/ 60;
                     seconds = duration % 60;
                   });
+                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                  Navigator.of(context).pop(totalSeconds);
                 }),
                 _buildPresetButton(context, '15 min', 15 * 60, (duration) {
                   setState(() {
@@ -345,6 +334,8 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
                     minutes = (duration % 3600) ~/ 60;
                     seconds = duration % 60;
                   });
+                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                  Navigator.of(context).pop(totalSeconds);
                 }),
                 _buildPresetButton(context, '30 min', 30 * 60, (duration) {
                   setState(() {
@@ -352,6 +343,8 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
                     minutes = (duration % 3600) ~/ 60;
                     seconds = duration % 60;
                   });
+                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                  Navigator.of(context).pop(totalSeconds);
                 }),
                 _buildPresetButton(context, '1 hour', 60 * 60, (duration) {
                   setState(() {
@@ -359,6 +352,8 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
                     minutes = (duration % 3600) ~/ 60;
                     seconds = duration % 60;
                   });
+                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
+                  Navigator.of(context).pop(totalSeconds);
                 }),
               ],
             ),
@@ -449,7 +444,9 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
       label: Text(label),
       onSelected: (selected) => onPressed(duration),
       backgroundColor: Theme.of(context).colorScheme.surface,
-      selectedColor: Theme.of(context).colorScheme.primary.withOpacity(0.2),
+      selectedColor: Theme.of(
+        context,
+      ).colorScheme.primary.withValues(alpha: 0.1),
       labelStyle: TextStyle(
         color: Theme.of(context).colorScheme.primary,
         fontWeight: FontWeight.w500,
