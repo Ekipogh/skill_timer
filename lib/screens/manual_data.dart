@@ -217,7 +217,7 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
     );
   }
 
-  void _saveManualSession(BuildContext context) {
+  void _saveManualSession(BuildContext context) async {
     final skillProvider = context.read<SkillProvider>();
 
     final sessionData = {
@@ -228,7 +228,7 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
     };
 
     try {
-      skillProvider.addSession(sessionData);
+      await skillProvider.addSession(sessionData);
     } catch (e) {
       CustomSnackBar.showError(context, message: 'Failed to save session: $e');
       return;
