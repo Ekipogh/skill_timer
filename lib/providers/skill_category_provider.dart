@@ -327,6 +327,9 @@ class SkillProvider extends ChangeNotifier {
       final db = await DBProvider().database;
       await db.insert('timer_sessions', session);
 
+      // update local list
+      _learningSessions.add(LearningSession.fromMap(session));
+
       // Update the skill's total time and session count
       final skillId = session['skillId'] as String;
       final skillIndex = _skills.indexWhere((s) => s.id == skillId);

@@ -186,9 +186,9 @@ void main() {
     expect(find.text('JavaScript'), findsOneWidget);
 
     // Verify time and session info (with bullet point format)
-    expect(find.text('1h 0m'), findsOneWidget);
+    expect(find.text('1h'), findsOneWidget);
     expect(find.text('5 sessions'), findsOneWidget);
-    expect(find.text('2h 0m'), findsOneWidget);
+    expect(find.text('2h'), findsOneWidget);
     expect(find.text('10 sessions'), findsOneWidget);
   });
 

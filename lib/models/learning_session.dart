@@ -38,4 +38,13 @@ class LearningSession {
       duration: duration ?? this.duration,
     );
   }
+
+  static LearningSession fromMap(Map<String, Object> session) {
+    return LearningSession(
+      id: session['id'] as String,
+      skillId: session['skillId'] as String,
+      datePerformed: DateTime.parse(session['datePerformed'] as String),
+      duration: session['duration'] as int,
+    );
+  }
 }

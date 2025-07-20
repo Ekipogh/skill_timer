@@ -110,3 +110,12 @@ class SessionReportGradientBackground extends GradientBackground {
         stops: const [0.0, 0.2],
       );
 }
+
+class GeneralGradientBackground extends GradientBackground {
+  const GeneralGradientBackground({required super.child, super.key})
+    : super(
+        begin: Alignment.topCenter,
+        end: Alignment.bottomCenter,
+        stops: const [0.0, 0.2],
+      );
+}
