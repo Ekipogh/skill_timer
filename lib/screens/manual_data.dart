@@ -320,40 +320,16 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
               spacing: 8,
               children: [
                 _buildPresetButton(context, '5 min', 5 * 60, (duration) {
-                  setState(() {
-                    hours = duration ~/ 3600;
-                    minutes = (duration % 3600) ~/ 60;
-                    seconds = duration % 60;
-                  });
-                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                  Navigator.of(context).pop(totalSeconds);
+                  _selectPresetDuration(context, setState, duration);
                 }),
                 _buildPresetButton(context, '15 min', 15 * 60, (duration) {
-                  setState(() {
-                    hours = duration ~/ 3600;
-                    minutes = (duration % 3600) ~/ 60;
-                    seconds = duration % 60;
-                  });
-                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                  Navigator.of(context).pop(totalSeconds);
+                  _selectPresetDuration(context, setState, duration);
                 }),
                 _buildPresetButton(context, '30 min', 30 * 60, (duration) {
-                  setState(() {
-                    hours = duration ~/ 3600;
-                    minutes = (duration % 3600) ~/ 60;
-                    seconds = duration % 60;
-                  });
-                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                  Navigator.of(context).pop(totalSeconds);
+                  _selectPresetDuration(context, setState, duration);
                 }),
                 _buildPresetButton(context, '1 hour', 60 * 60, (duration) {
-                  setState(() {
-                    hours = duration ~/ 3600;
-                    minutes = (duration % 3600) ~/ 60;
-                    seconds = duration % 60;
-                  });
-                  final totalSeconds = hours * 3600 + minutes * 60 + seconds;
-                  Navigator.of(context).pop(totalSeconds);
+                  _selectPresetDuration(context, setState, duration);
                 }),
               ],
             ),
@@ -380,6 +356,16 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
         );
       },
     );
+  }
+
+  /// Helper method to handle preset duration selection
+  void _selectPresetDuration(
+    BuildContext context,
+    StateSetter setState,
+    int duration,
+  ) {
+    // Close the dialog and return the selected duration
+    Navigator.of(context).pop(duration);
   }
 
   Widget _buildTimeColumn(

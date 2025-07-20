@@ -1,7 +1,6 @@
 /// Utility class containing common formatting functions used throughout the app.
 /// These functions provide consistent formatting for dates, durations, and other data.
-class Formatters {
-  Formatters._(); // Private constructor to prevent instantiation
+abstract class Formatters {
 
   /// Formats a DateTime to a readable date string in DD/MM/YYYY format.
   ///
