@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skill_timer/models/skill.dart';
 import 'common_containers.dart';
 
 class CustomTextField extends StatelessWidget {

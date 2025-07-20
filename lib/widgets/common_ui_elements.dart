@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/utils.dart';
 
 class StatBadge extends StatelessWidget {
   final IconData icon;
@@ -389,16 +390,7 @@ class StatItem extends StatelessWidget {
 
 class TimeFormatter {
   static String format(int seconds) {
-    final hours = seconds ~/ 3600;
-    final minutes = (seconds % 3600) ~/ 60;
-
-    if (hours > 0) {
-      return '${hours}h ${minutes}m';
-    } else if (minutes > 0) {
-      return '${minutes}m';
-    } else {
-      return '${seconds}s';
-    }
+    return Formatters.formatDuration(seconds);
   }
 
   static String formatWithMilliseconds(Duration duration) {

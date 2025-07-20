@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
 import '../providers/skill_category_provider.dart';
 import '../models/skill.dart';
+import '../utils/utils.dart';
 import 'package:skill_timer/models/learning_session.dart';
 
 class SessionReport extends StatefulWidget {
@@ -117,7 +118,7 @@ class _SessionReportState extends State<SessionReport> {
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
-                  _formatMonth(_selectedMonth),
+                  Formatters.formatMonthYear(_selectedMonth),
                   style: TextStyle(
                     color: Theme.of(context).colorScheme.primary,
                     fontWeight: FontWeight.bold,
@@ -137,7 +138,7 @@ class _SessionReportState extends State<SessionReport> {
         Expanded(
           child: StatCard(
             title: 'Total Time',
-            value: _formatDuration(totalTime),
+            value: Formatters.formatDuration(totalTime),
             icon: Icons.timer,
             color: Colors.blue,
           ),
@@ -206,7 +207,7 @@ class _SessionReportState extends State<SessionReport> {
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                         Text(
-                          _formatDuration(entry.value),
+                          Formatters.formatDuration(entry.value),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
@@ -290,13 +291,13 @@ class _SessionReportState extends State<SessionReport> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          _formatDate(date),
+                          Formatters.formatDate(date),
                           style: Theme.of(context).textTheme.titleSmall
                               ?.copyWith(fontWeight: FontWeight.bold),
                         ),
                         const Spacer(),
                         Text(
-                          _formatDuration(dayTotal),
+                          Formatters.formatDuration(dayTotal),
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: Theme.of(context).colorScheme.primary,
@@ -339,7 +340,7 @@ class _SessionReportState extends State<SessionReport> {
                             ),
                           ),
                           Text(
-                            _formatDuration(session.duration),
+                            Formatters.formatDuration(session.duration),
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
@@ -566,44 +567,6 @@ class _SessionReportState extends State<SessionReport> {
         ),
       ],
     );
-  }
-
-  String _formatMonth(DateTime date) {
-    const months = [
-      'January',
-      'February',
-      'March',
-      'April',
-      'May',
-      'June',
-      'July',
-      'August',
-      'September',
-      'October',
-      'November',
-      'December',
-    ];
-    return '${months[date.month - 1]} ${date.year}';
-  }
-
-  String _formatDate(DateTime date) {
-    return '${date.day}/${date.month}/${date.year}';
-  }
-
-  String _formatDuration(int seconds) {
-    if (seconds < 60) {
-      return '${seconds}s';
-    } else if (seconds < 3600) {
-      final minutes = seconds ~/ 60;
-      final remainingSeconds = seconds % 60;
-      return remainingSeconds > 0
-          ? '${minutes}m ${remainingSeconds}s'
-          : '${minutes}m';
-    } else {
-      final hours = seconds ~/ 3600;
-      final minutes = (seconds % 3600) ~/ 60;
-      return minutes > 0 ? '${hours}h ${minutes}m' : '${hours}h';
-    }
   }
 }
 

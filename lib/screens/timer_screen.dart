@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
+import 'package:skill_timer/screens/manual_data.dart';
 import '../providers/skill_category_provider.dart';
 import '../widgets/widgets.dart';
 
@@ -66,6 +67,19 @@ class _TimerScreenState extends State<TimerScreen> {
       appBar: CustomAppBar(
         title: widget.skill.name,
         centerTitle: true,
+        actions: [
+          CustomIconButton(
+            icon: Icons.border_color,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) =>
+                      ManualDataEntryScreen(skill: widget.skill),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: PopScope(
         canPop: false,
@@ -97,7 +111,9 @@ class _TimerScreenState extends State<TimerScreen> {
                   IconCard(
                     icon: Icons.psychology,
                     iconColor: colorScheme.primary,
-                    iconBackgroundColor: colorScheme.primary.withValues(alpha: 0.1),
+                    iconBackgroundColor: colorScheme.primary.withValues(
+                      alpha: 0.1,
+                    ),
                     title: widget.skill.name,
                     subtitle: widget.skill.description.isNotEmpty
                         ? widget.skill.description
@@ -117,14 +133,18 @@ class _TimerScreenState extends State<TimerScreen> {
 
                   // Control button
                   _stopwatch.isRunning
-                      ? PauseButton(onPressed: () {
-                          _stopTimer();
-                          setState(() {});
-                        })
-                      : StartButton(onPressed: () {
-                          _startTimer();
-                          setState(() {});
-                        }),
+                      ? PauseButton(
+                          onPressed: () {
+                            _stopTimer();
+                            setState(() {});
+                          },
+                        )
+                      : StartButton(
+                          onPressed: () {
+                            _startTimer();
+                            setState(() {});
+                          },
+                        ),
 
                   const Spacer(),
 
@@ -134,7 +154,9 @@ class _TimerScreenState extends State<TimerScreen> {
                       StatItem(
                         icon: Icons.timer,
                         label: 'Total Time',
-                        value: TimeFormatter.format(widget.skill.totalTimeSpent),
+                        value: TimeFormatter.format(
+                          widget.skill.totalTimeSpent,
+                        ),
                       ),
                       StatItem(
                         icon: Icons.analytics,
@@ -149,58 +171,61 @@ class _TimerScreenState extends State<TimerScreen> {
           ),
         ),
       ),
-      floatingActionButton: _sessionSaved ? null : SaveButton(
-        onPressed: () async {
-          if (!_stopwatch.isRunning && _stopwatch.elapsed.inSeconds == 0) {
-            return; // Do nothing if no time has elapsed
-          }
+      floatingActionButton: _sessionSaved
+          ? null
+          : SaveButton(
+              onPressed: () async {
+                if (!_stopwatch.isRunning &&
+                    _stopwatch.elapsed.inSeconds == 0) {
+                  return; // Do nothing if no time has elapsed
+                }
 
-          final bool shouldSave = await SaveSessionDialog.show(
-            context,
-            skillName: widget.skill.name,
-            elapsedTime: _elapsedTime,
-          );
-          if (!shouldSave) {
-            return;
-          }
-
-          if (_stopwatch.isRunning) {
-            _stopTimer();
-          }
-
-          if (!_sessionSaved) {
-            final skillProvider = context.read<SkillProvider>();
-
-            try {
-              // create a new session record
-              final session = {
-                'id': DateTime.now().millisecondsSinceEpoch.toString(),
-                'skillId': widget.skill.id,
-                'duration': _stopwatch.elapsed.inSeconds,
-                'datePerformed': DateTime.now().toIso8601String(),
-              };
-
-              await skillProvider.addSession(session);
-              _sessionSaved = true;
-
-              if (context.mounted) {
-                CustomSnackBar.showSuccess(
+                final bool shouldSave = await SaveSessionDialog.show(
                   context,
-                  message: 'Session saved successfully!',
+                  skillName: widget.skill.name,
+                  elapsedTime: _elapsedTime,
                 );
-                Navigator.pop(context, true);
-              }
-            } catch (e) {
-              if (context.mounted) {
-                CustomSnackBar.showError(
-                  context,
-                  message: 'Failed to save session: $e',
-                );
-              }
-            }
-          }
-        },
-      ),
+                if (!shouldSave) {
+                  return;
+                }
+
+                if (_stopwatch.isRunning) {
+                  _stopTimer();
+                }
+
+                if (!_sessionSaved) {
+                  final skillProvider = context.read<SkillProvider>();
+
+                  try {
+                    // create a new session record
+                    final session = {
+                      'id': DateTime.now().millisecondsSinceEpoch.toString(),
+                      'skillId': widget.skill.id,
+                      'duration': _stopwatch.elapsed.inSeconds,
+                      'datePerformed': DateTime.now().toIso8601String(),
+                    };
+
+                    await skillProvider.addSession(session);
+                    _sessionSaved = true;
+
+                    if (context.mounted) {
+                      CustomSnackBar.showSuccess(
+                        context,
+                        message: 'Session saved successfully!',
+                      );
+                      Navigator.pop(context, true);
+                    }
+                  } catch (e) {
+                    if (context.mounted) {
+                      CustomSnackBar.showError(
+                        context,
+                        message: 'Failed to save session: $e',
+                      );
+                    }
+                  }
+                }
+              },
+            ),
     );
   }
 
