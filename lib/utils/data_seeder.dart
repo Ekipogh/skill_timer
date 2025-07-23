@@ -1,22 +1,18 @@
-import 'package:sqflite/sqlite_api.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
 
 import '../models/skill_category.dart';
 import '../models/skill.dart';
-import '../services/database.dart';
 
 class DataSeeder {
-  static final DBProvider _dbProvider = DBProvider();
-  static Database? _cachedDatabase;
+  static final FirebaseProvider _firebaseProvider = FirebaseProvider();
+
 
   static Future<void> seedSampleData() async {
-    _cachedDatabase ??= await _dbProvider.database;
-    final db = _cachedDatabase!;
-
-    await seedCategories(db);
-    await seedSkills(db);
+    await seedCategories();
+    await seedSkills();
   }
 
-  static Future<void> seedCategories(Database db) async {
+  static Future<void> seedCategories() async {
     // Sample skill categories
     final sampleCategories = [
       SkillCategory(
@@ -52,18 +48,19 @@ class DataSeeder {
     ];
 
     // Check if categories already exist
-    final existingCategories = await db.query('skill_categories');
+    final existingCategories = _firebaseProvider.categories;
+
     if (existingCategories.isNotEmpty) {
       return; // Categories already seeded
     }
 
     // Insert categories
     for (final category in sampleCategories) {
-      await db.insert('skill_categories', category.toMap());
+      await _firebaseProvider.addCategory(category.toMap());
     }
   }
 
-  static Future<void> seedSkills(Database db) async {
+  static Future<void> seedSkills() async {
     // Sample skills
     final sampleSkills = [
       Skill(
@@ -101,14 +98,14 @@ class DataSeeder {
     ];
 
     // Check if skills already exist
-    final existingSkills = await db.query('skills');
+    final existingSkills = _firebaseProvider.skills;
     if (existingSkills.isNotEmpty) {
       return; // Skills already seeded
     }
 
     // Insert skills
     for (final skill in sampleSkills) {
-      await db.insert('skills', skill.toMap());
+      await _firebaseProvider.addSkill(skill.toMap());
     }
   }
 }

@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
-import 'package:skill_timer/providers/skill_category_provider.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
 import 'package:skill_timer/screens/manual_data.dart';
 import 'package:skill_timer/utils/formatters.dart';
 
 /// Mock provider specifically for form testing
-class MockSkillProviderForForm extends SkillProvider {
+class MockFirebaseProviderForForm extends FirebaseProvider {
   final List<Map<String, Object>> _addedSessions = [];
   bool _shouldThrowError = false;
 
@@ -34,12 +34,12 @@ class MockSkillProviderForForm extends SkillProvider {
 /// Helper to create testable form widget
 Widget createTestableForm({
   required Skill skill,
-  MockSkillProviderForForm? provider,
+  MockFirebaseProviderForForm? provider,
 }) {
   return MaterialApp(
     home: Scaffold(
-      body: ChangeNotifierProvider<SkillProvider>(
-        create: (_) => provider ?? MockSkillProviderForForm(),
+      body: ChangeNotifierProvider<FirebaseProvider>(
+        create: (_) => provider ?? MockFirebaseProviderForForm(),
         child: Builder(
           builder: (context) => ManualDataEntryForm(skill: skill),
         ),
@@ -50,11 +50,11 @@ Widget createTestableForm({
 
 void main() {
   group('ManualDataEntryForm Unit Tests', () {
-    late MockSkillProviderForForm mockProvider;
+    late MockFirebaseProviderForForm mockProvider;
     late Skill testSkill;
 
     setUp(() {
-      mockProvider = MockSkillProviderForForm();
+      mockProvider = MockFirebaseProviderForForm();
       testSkill = Skill(
         id: 'test-skill-1',
         name: 'Test Skill',

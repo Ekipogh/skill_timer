@@ -12,10 +12,10 @@ import 'package:skill_timer/models/skill_category.dart';
 import 'package:skill_timer/models/skill.dart';
 import 'package:skill_timer/screens/homescreen.dart';
 import 'package:skill_timer/screens/skills_screen.dart';
-import 'package:skill_timer/providers/skill_category_provider.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
 
 // Mock Provider for testing
-class MockSkillProvider extends SkillProvider {
+class MockFirebaseProvider extends FirebaseProvider {
   final List<SkillCategory> _mockSkillCategories = [
     SkillCategory(
       id: '1',
@@ -79,7 +79,7 @@ class MockSkillProvider extends SkillProvider {
   }
 
   @override
-  Future<void> addSkillCategory(SkillCategory category) async {
+  Future<void> addCategory(SkillCategory category) async {
     _mockSkillCategories.add(category);
     notifyListeners();
   }
@@ -99,8 +99,8 @@ class MockSkillProvider extends SkillProvider {
 void main() {
   // Helper function to create a testable widget with mock provider
   Widget createTestWidget({Widget? child}) {
-    return ChangeNotifierProvider<SkillProvider>(
-      create: (context) => MockSkillProvider(),
+    return ChangeNotifierProvider<FirebaseProvider>(
+      create: (context) => MockFirebaseProvider(),
       child: MaterialApp(home: child ?? const HomeScreen()),
     );
   }
@@ -167,11 +167,11 @@ void main() {
     WidgetTester tester,
   ) async {
     // Create a SkillsScreen directly with mock data
-    final mockProvider = MockSkillProvider();
-    final programmingCategory = mockProvider.skillCategories.first;
+    final mockProvider = MockFirebaseProvider();
+    final programmingCategory = mockProvider.categories.first;
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<SkillProvider>.value(
+      ChangeNotifierProvider<FirebaseProvider>.value(
         value: mockProvider,
         child: MaterialApp(home: SkillsScreen(category: programmingCategory)),
       ),
@@ -204,8 +204,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<SkillProvider>(
-        create: (context) => MockSkillProvider(),
+      ChangeNotifierProvider<FirebaseProvider>(
+        create: (context) => MockFirebaseProvider(),
         child: MaterialApp(home: SkillsScreen(category: category)),
       ),
     );

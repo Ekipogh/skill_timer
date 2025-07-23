@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../widgets/widgets.dart';
-import '../providers/skill_category_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../models/skill.dart';
 import '../utils/utils.dart';
 import 'package:skill_timer/models/learning_session.dart';
@@ -21,8 +21,8 @@ class _SessionReportState extends State<SessionReport> {
     super.initState();
     // Make sure data is loaded when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      final provider = context.read<SkillProvider>();
-      if (provider.learningSessions.isEmpty) {
+      final provider = context.read<FirebaseProvider>();
+      if (provider.sessions.isEmpty) {
         provider.refresh();
       }
     });
@@ -37,16 +37,16 @@ class _SessionReportState extends State<SessionReport> {
         actions: [
           CustomIconButton(
             icon: Icons.refresh,
-            onPressed: () => context.read<SkillProvider>().refresh(),
+            onPressed: () => context.read<FirebaseProvider>().refresh(),
             tooltip: 'Refresh Data',
           ),
           const SizedBox(width: 8),
         ],
       ),
-      body: Consumer<SkillProvider>(
+      body: Consumer<FirebaseProvider>(
         builder: (context, provider, child) {
           // Loading state
-          if (provider.isLoading && provider.learningSessions.isEmpty) {
+          if (provider.isLoading && provider.sessions.isEmpty) {
             return const LoadingCard(text: 'Loading session data...');
           }
 
@@ -233,7 +233,7 @@ class _SessionReportState extends State<SessionReport> {
 
   Widget _buildSessionsList(
     List<LearningSession> sessions,
-    SkillProvider provider,
+    FirebaseProvider provider,
   ) {
     if (sessions.isEmpty) {
       return EmptyStateCard(

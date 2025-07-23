@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
 import 'package:skill_timer/screens/manual_data.dart';
-import '../providers/skill_category_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../widgets/widgets.dart';
 
 class TimerScreen extends StatefulWidget {
@@ -194,7 +194,7 @@ class _TimerScreenState extends State<TimerScreen> {
                 }
 
                 if (!_sessionSaved) {
-                  final skillProvider = context.read<SkillProvider>();
+                  final fireBaseProvider = context.read<FirebaseProvider>();
 
                   try {
                     // create a new session record
@@ -205,7 +205,7 @@ class _TimerScreenState extends State<TimerScreen> {
                       'datePerformed': DateTime.now().toIso8601String(),
                     };
 
-                    await skillProvider.addSession(session);
+                    await fireBaseProvider.addSession(session);
                     _sessionSaved = true;
 
                     if (context.mounted) {

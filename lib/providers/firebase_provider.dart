@@ -12,6 +12,16 @@ class FirebaseProvider with ChangeNotifier {
   List<LearningSession> _sessions = [];
   List<LearningSession> get sessions => _sessions;
 
+  bool _isLoading = false;
+  bool get isLoading => _isLoading;
+  bool _hasError = false;
+  bool get hasError => _hasError;
+  String? _error;
+  String? get error => _error;
+
+  bool get isEmpty =>
+      _skills.isEmpty && _categories.isEmpty && _sessions.isEmpty;
+
   Future<void> fetchSkills() async {
     final firestore = FirebaseService.firestore;
     _skills = await firestore
@@ -56,36 +66,36 @@ class FirebaseProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> addSkill(Skill skill) async {
+  Future<void> addSkill(Map<String, dynamic> skillData) async {
     final firestore = FirebaseService.firestore;
     await firestore
         .collection("users")
         .doc("userId")
         .collection("skills")
-        .add(skill.toMap());
-    _skills.add(skill);
+        .add(skillData);
+    _skills.add(Skill.fromMap(skillData));
     notifyListeners();
   }
 
-  Future<void> addCategory(SkillCategory category) async {
+  Future<void> addCategory(Map<String, dynamic> categoryData) async {
     final firestore = FirebaseService.firestore;
     await firestore
         .collection("users")
         .doc("userId")
         .collection("categories")
-        .add(category.toMap());
-    _categories.add(category);
+        .add(categoryData);
+    _categories.add(SkillCategory.fromMap(categoryData));
     notifyListeners();
   }
 
-  Future<void> addSession(LearningSession session) async {
+  Future<void> addSession(Map<String, dynamic> sessionData) async {
     final firestore = FirebaseService.firestore;
     await firestore
         .collection("users")
         .doc("userId")
         .collection("sessions")
-        .add(session.toMap());
-    _sessions.add(session);
+        .add(sessionData);
+    _sessions.add(LearningSession.fromMap(sessionData));
     notifyListeners();
   }
 
@@ -168,5 +178,77 @@ class FirebaseProvider with ChangeNotifier {
         .delete();
     _sessions.removeWhere((s) => s.id == sessionId);
     notifyListeners();
+  }
+
+  Future<void> refresh() async {
+    await fetchSkills();
+    await fetchCategories();
+    await fetchSessions();
+    notifyListeners();
+  }
+
+  Future<void> restoreSkill(Skill skill) async {
+    final firestore = FirebaseService.firestore;
+    await firestore
+        .collection("users")
+        .doc("userId")
+        .collection("skills")
+        .add(skill.toMap());
+    _skills.add(skill);
+    notifyListeners();
+  }
+
+  Future<void> restoreCategory(SkillCategory category) async {
+    final firestore = FirebaseService.firestore;
+    await firestore
+        .collection("users")
+        .doc("userId")
+        .collection("categories")
+        .add(category.toMap());
+    _categories.add(category);
+    notifyListeners();
+  }
+
+  Future<void> restoreSession(LearningSession session) async {
+    final firestore = FirebaseService.firestore;
+    await firestore
+        .collection("users")
+        .doc("userId")
+        .collection("sessions")
+        .add(session.toMap());
+    _sessions.add(session);
+    notifyListeners();
+  }
+
+  List<LearningSession> getSessionsForMonth(DateTime selectedMonth) {
+    return _sessions.where((session) {
+      final sessionDate = session.datePerformed;
+      return sessionDate.year == selectedMonth.year &&
+          sessionDate.month == selectedMonth.month;
+    }).toList();
+  }
+
+  int getTotalTimeForMonth(DateTime selectedMonth) {
+    return getSessionsForMonth(
+      selectedMonth,
+    ).fold(0, (total, session) => total + session.duration);
+  }
+
+  int getTotalSessionsForMonth(DateTime selectedMonth) {
+    return getSessionsForMonth(selectedMonth).length;
+  }
+
+  Map<String, int> getSkillTimeBreakdownForMonth(DateTime selectedMonth) {
+    final Map<String, int> breakdown = {};
+    for (var session in getSessionsForMonth(selectedMonth)) {
+      breakdown[session.skillId] ??= 0;
+      breakdown[session.skillId] =
+          breakdown[session.skillId]! + session.duration;
+    }
+    return breakdown;
+  }
+
+  List<Skill> getSkillsForCategory(String categoryId) {
+    return _skills.where((skill) => skill.category == categoryId).toList();
   }
 }

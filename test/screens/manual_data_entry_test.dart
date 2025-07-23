@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
-import 'package:skill_timer/providers/skill_category_provider.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
 import 'package:skill_timer/screens/manual_data.dart';
 import 'package:skill_timer/utils/formatters.dart';
 
 /// Mock provider for testing manual data entry functionality
-class MockSkillProvider extends SkillProvider {
+class MockFirebaseProvider extends FirebaseProvider {
   final List<Map<String, Object>> _mockSessions = [];
   bool _throwError = false;
 
@@ -64,11 +64,11 @@ class MockSkillProvider extends SkillProvider {
 /// Helper function to create a testable widget with provider
 Widget createTestableWidget({
   required Widget child,
-  MockSkillProvider? mockProvider,
+  MockFirebaseProvider? mockProvider,
 }) {
   return MaterialApp(
-    home: ChangeNotifierProvider<SkillProvider>(
-      create: (_) => mockProvider ?? MockSkillProvider(),
+    home: ChangeNotifierProvider<FirebaseProvider>(
+      create: (_) => mockProvider ?? MockFirebaseProvider(),
       child: child,
     ),
   );
@@ -76,11 +76,11 @@ Widget createTestableWidget({
 
 void main() {
   group('ManualDataEntryScreen Tests', () {
-    late MockSkillProvider mockProvider;
+    late MockFirebaseProvider mockProvider;
     late Skill testSkill;
 
     setUp(() {
-      mockProvider = MockSkillProvider();
+      mockProvider = MockFirebaseProvider();
       testSkill = Skill(
         id: 'test-skill-1',
         name: 'Flutter Development',

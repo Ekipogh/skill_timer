@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../providers/skill_category_provider.dart';
-import '../models/skill_category.dart';
-import '../widgets/widgets.dart';
-import 'skills_screen.dart';
-import '../utils/icons.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
+import 'package:skill_timer/models/skill_category.dart';
+import 'package:skill_timer/widgets/widgets.dart';
+import 'package:skill_timer/screens/skills_screen.dart';
+import 'package:skill_timer/utils/icons.dart';
 
 class SkillCategoryTile extends StatelessWidget {
   final SkillCategory skillCategory;
@@ -87,7 +87,7 @@ class _HomeScreenState extends State<HomeScreen> {
     super.initState();
     // Load skill categories when the screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<SkillProvider>().refresh();
+      context.read<FirebaseProvider>().refresh();
     });
   }
 
@@ -100,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
           CustomIconButton(
             icon: Icons.refresh,
             onPressed: () {
-              context.read<SkillProvider>().refresh();
+              context.read<FirebaseProvider>().refresh();
             },
             tooltip: 'Refresh',
           ),
@@ -116,10 +116,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 8),
         ],
       ),
-      body: Consumer<SkillProvider>(
+      body: Consumer<FirebaseProvider>(
         builder: (context, provider, child) {
           // Loading state
-          if (provider.isLoading && provider.skillCategories.isEmpty) {
+          if (provider.isLoading && provider.categories.isEmpty) {
             return const LoadingCard(text: 'Loading your skills...');
           }
 
@@ -150,9 +150,9 @@ class _HomeScreenState extends State<HomeScreen> {
             onRefresh: () => provider.refresh(),
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: provider.skillCategories.length,
+              itemCount: provider.categories.length,
               itemBuilder: (context, index) {
-                final skillCategory = provider.skillCategories[index];
+                final skillCategory = provider.categories[index];
                 return _buildEnhancedSkillCategoryTile(skillCategory);
               },
             ),
@@ -188,7 +188,7 @@ class _HomeScreenState extends State<HomeScreen> {
       },
       onDismissed: (direction) {
         if (direction == DismissDirection.endToStart) {
-          _deleteSkillCategory(skillCategory);
+          _deleteCategory(skillCategory);
         }
       },
       child: Stack(
@@ -307,10 +307,10 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _addNewSkillCategory() {
     // Show dialog to add new skill category
-    _showAddSkillCategoryDialog();
+    _showaddCategoryDialog();
   }
 
-  void _showAddSkillCategoryDialog() {
+  void _showaddCategoryDialog() {
     AddCategoryDialog.show(
       context,
       onConfirm: (name, description) {
@@ -320,7 +320,7 @@ class _HomeScreenState extends State<HomeScreen> {
           description: description,
           iconPath: 'school', // Default icon
         );
-        context.read<SkillProvider>().addSkillCategory(newCategory);
+        context.read<FirebaseProvider>().addCategory(newCategory.toMap());
       },
     );
   }
@@ -335,7 +335,7 @@ class _HomeScreenState extends State<HomeScreen> {
           name: name,
           description: description,
         );
-        context.read<SkillProvider>().updateSkillCategory(updatedCategory);
+        context.read<FirebaseProvider>().updateCategory(updatedCategory);
       },
     );
   }
@@ -345,9 +345,9 @@ class _HomeScreenState extends State<HomeScreen> {
     _showEditSkillCategoryDialog(skillCategory);
   }
 
-  void _deleteSkillCategory(SkillCategory skillCategory) {
+  void _deleteCategory(SkillCategory skillCategory) {
     // Immediately delete from provider to remove from UI
-    context.read<SkillProvider>().deleteSkillCategory(skillCategory.id);
+    context.read<FirebaseProvider>().deleteCategory(skillCategory.id);
 
     // Show confirmation snackbar with undo option
     CustomSnackBar.showUndo(
@@ -355,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> {
       message: 'Deleted "${skillCategory.name}" skill category',
       onUndo: () {
         // Restore the skill category if undo is pressed
-        context.read<SkillProvider>().restoreSkillCategory(skillCategory);
+        context.read<FirebaseProvider>().restoreCategory(skillCategory);
       },
     );
   }
