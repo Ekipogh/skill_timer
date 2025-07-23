@@ -180,10 +180,26 @@ class FirebaseProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  void calculateSkillStats() {
+    for (var skill in _skills) {
+      final skillSessions = _sessions
+          .where((session) => session.skillId == skill.id)
+          .toList();
+      skill.totalTimeSpent = skillSessions.fold(
+        0,
+        (total, session) => total + session.duration,
+      );
+      skill.sessionsCount = skillSessions.length;
+    }
+    notifyListeners();
+  }
+
   Future<void> refresh() async {
     await fetchSkills();
     await fetchCategories();
     await fetchSessions();
+    // Recalculate time spent and sessions count for each skill
+    calculateSkillStats();
     notifyListeners();
   }
 

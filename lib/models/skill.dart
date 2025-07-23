@@ -3,8 +3,8 @@ class Skill {
   final String name;
   final String description;
   final String category;
-  final int totalTimeSpent; // in seconds
-  final int sessionsCount;
+  int totalTimeSpent; // in seconds
+  int sessionsCount;
 
   Skill({
     required this.id,

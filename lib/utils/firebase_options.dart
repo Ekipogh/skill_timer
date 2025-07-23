@@ -18,13 +18,31 @@ class SkillTimerFirebaseOptions {
     };
   }
 
-  // Common options for all platforms
-  static const String apiKey = 'AIzaSyC_uwSDM5Fc3aB_gQCiU5HQ4jWFuGnjG9w';
-  static const String authDomain = 'ru.ekipogh.skill_timer';
-  static const String projectId = 'skilltimer-782c0';
-  static const String appId = '1:492145826496:android:c2898cd581e721529f2b25';
-  static const String storageBucket = 'skilltimer-782c0.firebasestorage.app';
-  static const String messagingSenderId = '492145826496';
+  // Firebase configuration - these are safe to expose in client code
+  // as Firebase security is enforced through server-side Security Rules
+  static const String apiKey = String.fromEnvironment(
+    'FIREBASE_API_KEY',
+  );
+  static const String authDomain = String.fromEnvironment(
+    'FIREBASE_AUTH_DOMAIN',
+    defaultValue: 'ru.ekipogh.skill_timer'
+  );
+  static const String projectId = String.fromEnvironment(
+    'FIREBASE_PROJECT_ID',
+    defaultValue: 'skilltimer-782c0'
+  );
+  static const String appId = String.fromEnvironment(
+    'FIREBASE_APP_ID',
+    defaultValue: '1:492145826496:android:c2898cd581e721529f2b25'
+  );
+  static const String storageBucket = String.fromEnvironment(
+    'FIREBASE_STORAGE_BUCKET',
+    defaultValue: 'skilltimer-782c0.firebasestorage.app'
+  );
+  static const String messagingSenderId = String.fromEnvironment(
+    'FIREBASE_MESSAGING_SENDER_ID',
+    defaultValue: '492145826496'
+  );
 
   static FirebaseOptions android = FirebaseOptions(
     apiKey: apiKey,
