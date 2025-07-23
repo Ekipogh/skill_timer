@@ -62,4 +62,15 @@ class Skill {
   String toString() {
     return 'Skill(id: $id, name: $name)';
   }
+
+  static Skill fromMap(Map<String, dynamic> map) {
+    return Skill(
+      id: map['id'],
+      name: map['name'],
+      description: map['description'],
+      category: map['category'],
+      totalTimeSpent: map['totalTimeSpent'] ?? 0,
+      sessionsCount: map['sessionsCount'] ?? 0,
+    );
+  }
 }

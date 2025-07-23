@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "492145826496",
+    "project_id": "skilltimer-782c0",
+    "storage_bucket": "skilltimer-782c0.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:492145826496:android:c2898cd581e721529f2b25",
+        "android_client_info": {
+          "package_name": "ru.ekipogh.skill_timer"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_uwSDM5Fc3aB_gQCiU5HQ4jWFuGnjG9w"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

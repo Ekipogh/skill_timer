@@ -33,4 +33,13 @@ class SkillCategory {
       iconPath: iconPath,
     );
   }
+
+  static SkillCategory fromMap(Map<String, dynamic> data) {
+    return SkillCategory(
+      id: data['id'],
+      name: data['name'],
+      description: data['description'],
+      iconPath: data['iconPath'],
+    );
+  }
 }
