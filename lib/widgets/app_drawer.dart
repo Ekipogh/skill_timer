@@ -2,7 +2,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/screens/session_report.dart';
-import '../providers/skill_category_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../widgets/dev_database_utils.dart';
 import '../widgets/widgets.dart';
 
@@ -94,9 +94,9 @@ class AppDrawer extends StatelessWidget {
                 ],
               ),
               const SizedBox(height: 20),
-              Consumer<SkillProvider>(
+              Consumer<FirebaseProvider>(
                 builder: (context, provider, child) {
-                  final totalCategories = provider.skillCategories.length;
+                  final totalCategories = provider.categories.length;
                   final totalSkills = provider.skills.length;
 
                   return Row(
@@ -379,7 +379,7 @@ class AppDrawer extends StatelessWidget {
 
   void _refreshData(BuildContext context) {
     Navigator.pop(context); // Close drawer
-    context.read<SkillProvider>().refresh();
+    context.read<FirebaseProvider>().refresh();
 
     // Show confirmation
     CustomSnackBar.showSuccess(context, message: 'Data refreshed successfully');

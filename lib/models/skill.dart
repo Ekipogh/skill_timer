@@ -3,8 +3,8 @@ class Skill {
   final String name;
   final String description;
   final String category;
-  final int totalTimeSpent; // in seconds
-  final int sessionsCount;
+  int totalTimeSpent; // in seconds
+  int sessionsCount;
 
   Skill({
     required this.id,
@@ -61,5 +61,16 @@ class Skill {
   @override
   String toString() {
     return 'Skill(id: $id, name: $name)';
+  }
+
+  static Skill fromMap(Map<String, dynamic> map) {
+    return Skill(
+      id: map['id'],
+      name: map['name'],
+      description: map['description'],
+      category: map['category'],
+      totalTimeSpent: map['totalTimeSpent'] ?? 0,
+      sessionsCount: map['sessionsCount'] ?? 0,
+    );
   }
 }

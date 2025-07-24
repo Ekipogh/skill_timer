@@ -39,7 +39,7 @@ class LearningSession {
     );
   }
 
-  static LearningSession fromMap(Map<String, Object> session) {
+  static LearningSession fromMap(Map<String, dynamic> session) {
     return LearningSession(
       id: session['id'] as String,
       skillId: session['skillId'] as String,

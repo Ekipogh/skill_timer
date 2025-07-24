@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
-import '../providers/skill_category_provider.dart';
+import '../providers/firebase_provider.dart';
 import '../widgets/widgets.dart';
 import 'package:skill_timer/screens/timer_screen.dart';
 
@@ -51,7 +51,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
 
           // Skills list
           Expanded(
-            child: Consumer<SkillProvider>(
+            child: Consumer<FirebaseProvider>(
               builder: (context, provider, child) {
                 final skills = provider.getSkillsForCategory(
                   widget.category.id,
@@ -177,20 +177,20 @@ class _SkillsScreenState extends State<SkillsScreen> {
           description: description,
           category: widget.category.id,
         );
-        context.read<SkillProvider>().addSkill(newSkill);
+        context.read<FirebaseProvider>().addSkill(newSkill.toMap());
       },
     );
   }
 
   void _deleteSkill(Skill skill) {
-    context.read<SkillProvider>().deleteSkill(skill.id);
+    context.read<FirebaseProvider>().deleteSkill(skill.id);
 
     // Show confirmation snackbar
     CustomSnackBar.showUndo(
       context,
       message: '${skill.name} deleted',
       onUndo: () {
-        context.read<SkillProvider>().restoreSkill(skill);
+        context.read<FirebaseProvider>().restoreSkill(skill);
       },
     );
   }
@@ -207,7 +207,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
           description: description,
           category: skill.category
         );
-        context.read<SkillProvider>().updateSkill(updatedSkill);
+        context.read<FirebaseProvider>().updateSkill(updatedSkill);
       },
     );
   }

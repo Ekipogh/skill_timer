@@ -8,7 +8,6 @@ plugins {
 android {
     namespace = "ru.ekipogh.skill_timer"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion = flutter.ndkVersion
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

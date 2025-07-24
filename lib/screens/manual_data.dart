@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
-import 'package:skill_timer/providers/skill_category_provider.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
 import 'package:skill_timer/utils/formatters.dart';
 import 'package:skill_timer/widgets/widgets.dart';
 
@@ -218,7 +218,7 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
   }
 
   void _saveManualSession(BuildContext context) async {
-    final skillProvider = context.read<SkillProvider>();
+    final firebaseProvider = context.read<FirebaseProvider>();
 
     final sessionData = {
       "id": DateTime.now().millisecondsSinceEpoch.toString(),
@@ -228,7 +228,7 @@ class _ManualDataEntryFormState extends State<ManualDataEntryForm> {
     };
 
     try {
-      await skillProvider.addSession(sessionData);
+      await firebaseProvider.addSession(sessionData);
     } catch (e) {
       CustomSnackBar.showError(context, message: 'Failed to save session: $e');
       return;

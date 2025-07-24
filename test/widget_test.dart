@@ -12,10 +12,10 @@ import 'package:skill_timer/models/skill_category.dart';
 import 'package:skill_timer/models/skill.dart';
 import 'package:skill_timer/screens/homescreen.dart';
 import 'package:skill_timer/screens/skills_screen.dart';
-import 'package:skill_timer/providers/skill_category_provider.dart';
+import 'package:skill_timer/providers/firebase_provider.dart';
 
 // Mock Provider for testing
-class MockSkillProvider extends SkillProvider {
+class MockFirebaseProvider extends FirebaseProvider {
   final List<SkillCategory> _mockSkillCategories = [
     SkillCategory(
       id: '1',
@@ -51,7 +51,7 @@ class MockSkillProvider extends SkillProvider {
   ];
 
   @override
-  List<SkillCategory> get skillCategories => _mockSkillCategories;
+  List<SkillCategory> get categories => _mockSkillCategories;
 
   @override
   List<Skill> get skills => _mockSkills;
@@ -66,7 +66,7 @@ class MockSkillProvider extends SkillProvider {
   String? get error => null;
 
   @override
-  bool get isEmpty => false;
+  bool get isEmpty => _mockSkillCategories.isEmpty && _mockSkills.isEmpty;
 
   @override
   List<Skill> getSkillsForCategory(String categoryId) {
@@ -74,19 +74,19 @@ class MockSkillProvider extends SkillProvider {
   }
 
   @override
-  Future<void> loadSkillCategories() async {
+  Future<void> fetchCategories() async {
     // Mock - do nothing, data is already available
   }
 
   @override
-  Future<void> addSkillCategory(SkillCategory category) async {
-    _mockSkillCategories.add(category);
+  Future<void> addCategory(Map<String, dynamic> categoryData) async {
+    _mockSkillCategories.add(SkillCategory.fromMap(categoryData));
     notifyListeners();
   }
 
   @override
-  Future<void> addSkill(Skill skill) async {
-    _mockSkills.add(skill);
+  Future<void> addSkill(Map<String, dynamic> skillData) async {
+    _mockSkills.add(Skill.fromMap(skillData));
     notifyListeners();
   }
 
@@ -99,8 +99,8 @@ class MockSkillProvider extends SkillProvider {
 void main() {
   // Helper function to create a testable widget with mock provider
   Widget createTestWidget({Widget? child}) {
-    return ChangeNotifierProvider<SkillProvider>(
-      create: (context) => MockSkillProvider(),
+    return ChangeNotifierProvider<FirebaseProvider>(
+      create: (context) => MockFirebaseProvider(),
       child: MaterialApp(home: child ?? const HomeScreen()),
     );
   }
@@ -167,11 +167,11 @@ void main() {
     WidgetTester tester,
   ) async {
     // Create a SkillsScreen directly with mock data
-    final mockProvider = MockSkillProvider();
-    final programmingCategory = mockProvider.skillCategories.first;
+    final mockProvider = MockFirebaseProvider();
+    final programmingCategory = mockProvider.categories.first;
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<SkillProvider>.value(
+      ChangeNotifierProvider<FirebaseProvider>.value(
         value: mockProvider,
         child: MaterialApp(home: SkillsScreen(category: programmingCategory)),
       ),
@@ -204,8 +204,8 @@ void main() {
     );
 
     await tester.pumpWidget(
-      ChangeNotifierProvider<SkillProvider>(
-        create: (context) => MockSkillProvider(),
+      ChangeNotifierProvider<FirebaseProvider>(
+        create: (context) => MockFirebaseProvider(),
         child: MaterialApp(home: SkillsScreen(category: category)),
       ),
     );
