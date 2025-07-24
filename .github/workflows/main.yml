@@ -18,7 +18,10 @@ concurrency:
 jobs:
   build_and_release:
     runs-on: ubuntu-latest
-
+    with:
+      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+    env:
+      FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
     steps:
       - name: 📂 Checkout code
         uses: actions/checkout@v3
