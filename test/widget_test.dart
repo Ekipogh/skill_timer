@@ -51,7 +51,7 @@ class MockFirebaseProvider extends FirebaseProvider {
   ];
 
   @override
-  List<SkillCategory> get skillCategories => _mockSkillCategories;
+  List<SkillCategory> get categories => _mockSkillCategories;
 
   @override
   List<Skill> get skills => _mockSkills;
@@ -66,7 +66,7 @@ class MockFirebaseProvider extends FirebaseProvider {
   String? get error => null;
 
   @override
-  bool get isEmpty => false;
+  bool get isEmpty => _mockSkillCategories.isEmpty && _mockSkills.isEmpty;
 
   @override
   List<Skill> getSkillsForCategory(String categoryId) {
@@ -74,19 +74,19 @@ class MockFirebaseProvider extends FirebaseProvider {
   }
 
   @override
-  Future<void> loadSkillCategories() async {
+  Future<void> fetchCategories() async {
     // Mock - do nothing, data is already available
   }
 
   @override
-  Future<void> addCategory(SkillCategory category) async {
-    _mockSkillCategories.add(category);
+  Future<void> addCategory(Map<String, dynamic> categoryData) async {
+    _mockSkillCategories.add(SkillCategory.fromMap(categoryData));
     notifyListeners();
   }
 
   @override
-  Future<void> addSkill(Skill skill) async {
-    _mockSkills.add(skill);
+  Future<void> addSkill(Map<String, dynamic> skillData) async {
+    _mockSkills.add(Skill.fromMap(skillData));
     notifyListeners();
   }
 

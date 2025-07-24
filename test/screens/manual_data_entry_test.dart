@@ -8,7 +8,7 @@ import 'package:skill_timer/utils/formatters.dart';
 
 /// Mock provider for testing manual data entry functionality
 class MockFirebaseProvider extends FirebaseProvider {
-  final List<Map<String, Object>> _mockSessions = [];
+  final List<Map<String, dynamic>> _mockSessions = [];
   bool _throwError = false;
 
   // Test data
@@ -37,7 +37,7 @@ class MockFirebaseProvider extends FirebaseProvider {
 
   /// Add a session - for testing purposes
   @override
-  Future<void> addSession(Map<String, Object> session) async {
+  Future<void> addSession(Map<String, dynamic> session) async {
     if (_throwError) {
       throw Exception('Mock error for testing');
     }
@@ -46,7 +46,7 @@ class MockFirebaseProvider extends FirebaseProvider {
   }
 
   /// Get all sessions added during tests
-  List<Map<String, Object>> get testSessions =>
+  List<Map<String, dynamic>> get testSessions =>
       List.unmodifiable(_mockSessions);
 
   /// Configure provider to throw errors for testing error scenarios

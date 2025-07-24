@@ -8,6 +8,7 @@ class DataSeeder {
 
 
   static Future<void> seedSampleData() async {
+    await _firebaseProvider.refresh();
     await seedCategories();
     await seedSkills();
   }

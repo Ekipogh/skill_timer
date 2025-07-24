@@ -38,6 +38,7 @@ dependencies:
   provider: ^6.1.2
   cloud_firestore: ^5.6.12
   firebase_core: ^3.15.2
+  flutter_dotenv: ^5.2.1
 
 dev_dependencies:
   flutter_test:
@@ -91,3 +92,6 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+  assets:
+    - .env
