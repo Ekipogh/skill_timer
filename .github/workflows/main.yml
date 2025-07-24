@@ -22,6 +22,10 @@ jobs:
       - name: 📂 Checkout code
         uses: actions/checkout@v3
 
+      - name: Create .env file
+        run: |
+          echo "FIREBASE_API_KEY=${{ secrets.FIREBASE_API_KEY }}" > .env
+
       - name: 🚀 Cache pub deps
         uses: actions/cache@v3
         with:
@@ -45,8 +49,6 @@ jobs:
 
       - name: ✅ Run tests
         run: flutter test --coverage
-        env:
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}  # Ensure this is set in your repo secrets
 
       - name: 🏗️ Build APKs
         run: flutter build apk --release --split-per-abi
