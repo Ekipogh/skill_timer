@@ -420,7 +420,6 @@ class TargetTimeCard extends StatelessWidget {
   final ValueChanged<int> onTargetTimeSelected;
   final int? selectedTargetTime;
   static const List<int> _targetTimeOptions = [
-    1,
     15,
     30,
     60,
@@ -443,8 +442,9 @@ class TargetTimeCard extends StatelessWidget {
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+        child: Wrap(
+          spacing: 8,
+          runSpacing: 8,
           children: _targetTimeOptions.map((option) {
             final isSelected = selectedTargetTime == option;
 
