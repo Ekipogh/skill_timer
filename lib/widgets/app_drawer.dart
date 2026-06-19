@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/screens/analytics.dart';
 import 'package:skill_timer/screens/session_report.dart';
 import '../providers/skill_category_provider.dart';
 import '../widgets/dev_database_utils.dart';
@@ -172,7 +173,6 @@ class AppDrawer extends StatelessWidget {
           title: 'Progress Analytics',
           subtitle: 'Track your improvement',
           onTap: () => _navigateToAnalytics(context),
-          enabled: false, // Not implemented yet
         ),
         _buildDrawerTile(
           context,
@@ -346,7 +346,10 @@ class AppDrawer extends StatelessWidget {
 
   void _navigateToAnalytics(BuildContext context) {
     Navigator.pop(context); // Close drawer
-    // TODO: Implement analytics screen
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const AnalyticsScreen()),
+    );
   }
 
   void _navigateToAchievements(BuildContext context) {

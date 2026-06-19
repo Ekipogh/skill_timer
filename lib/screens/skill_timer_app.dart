@@ -5,7 +5,6 @@ import 'package:skill_timer/providers/skill_category_provider.dart';
 import 'package:skill_timer/utils/constants.dart';
 
 class SkillTimerApp extends StatefulWidget {
-  @override
   const SkillTimerApp({super.key});
   @override
   State<SkillTimerApp> createState() => _SkillTimerAppState();

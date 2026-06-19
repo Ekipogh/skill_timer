@@ -410,4 +410,106 @@ class SkillProvider extends ChangeNotifier {
 
     return breakdown;
   }
+
+  int getTotalTime() {
+    return _learningSessions.fold(0, (sum, session) => sum + session.duration);
+  }
+
+  int getTotalSessions() {
+    return _learningSessions.length;
+  }
+
+  int getAverageSessionDuration() {
+    final totalSessions = getTotalSessions();
+    if (totalSessions == 0) return 0;
+    return getTotalTime() ~/ totalSessions;
+  }
+
+  int getCurrentStreak() {
+    if (_learningSessions.isEmpty) return 0;
+
+    // Sort sessions by date in descending order
+    final sortedSessions = List<LearningSession>.from(_learningSessions)
+      ..sort((a, b) => b.datePerformed.compareTo(a.datePerformed));
+
+    int streak = 1;
+    DateTime lastDate = DateTime(
+      sortedSessions.first.datePerformed.year,
+      sortedSessions.first.datePerformed.month,
+      sortedSessions.first.datePerformed.day,
+    );
+
+    for (int i = 1; i < sortedSessions.length; i++) {
+      final currentDate = DateTime(
+        sortedSessions[i].datePerformed.year,
+        sortedSessions[i].datePerformed.month,
+        sortedSessions[i].datePerformed.day,
+      );
+
+      // Check if the current session is the day before the last session
+      if (lastDate.difference(currentDate).inDays == 1) {
+        streak++;
+        lastDate = currentDate;
+      } else if (lastDate.difference(currentDate).inDays > 1) {
+        break; // Streak is broken
+      }
+    }
+
+    return streak;
+  }
+
+  int getTimeForPeriod(Period period) {
+    final now = DateTime.now();
+    DateTime startDate;
+
+    switch (period) {
+      case Period.today:
+        startDate = DateTime(now.year, now.month, now.day);
+        break;
+      case Period.thisWeek:
+        startDate = now.subtract(Duration(days: now.weekday - 1));
+        startDate = DateTime(startDate.year, startDate.month, startDate.day);
+        break;
+      case Period.thisMonth:
+        startDate = DateTime(now.year, now.month, 1);
+        break;
+      case Period.thisYear:
+        startDate = DateTime(now.year, 1, 1);
+        break;
+      case Period.allTime:
+        startDate = DateTime(0);
+        break;
+    }
+
+    return getSessionsForDateRange(startDate, now)
+        .fold(0, (sum, session) => sum + session.duration);
+  }
+
+  Map<String, int> getTimeBySkill({int length = 5}) {
+    final Map<String, int> skillTimeMap = {};
+
+    for (var session in _learningSessions) {
+      final skill = _skills.firstWhere(
+        (s) => s.id == session.skillId,
+        orElse: () => Skill(
+          id: session.skillId,
+          name: 'Unknown Skill',
+          description: '',
+          category: '',
+          totalTimeSpent: 0,
+          sessionsCount: 0,
+        ),
+      );
+      skillTimeMap[skill.name] =
+          (skillTimeMap[skill.name] ?? 0) + session.duration;
+    }
+
+    // Sort by time spent and take the top 'length' skills
+    final sortedSkills = skillTimeMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    return Map.fromEntries(sortedSkills.take(length));
+  }
 }
+
+enum Period { today, thisWeek, thisMonth, thisYear, allTime }
