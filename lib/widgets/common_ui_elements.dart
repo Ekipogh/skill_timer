@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../utils/utils.dart';
+import 'package:fl_chart/fl_chart.dart';
 
 class StatBadge extends StatelessWidget {
   final IconData icon;
@@ -586,17 +587,274 @@ class PeriodMetric extends StatelessWidget {
   }
 }
 
+const _analyticsChartColors = <Color>[
+  Color(0xFFF9413A),
+  Color(0xFFE91E63),
+  Color(0xFF9C27B0),
+  Color(0xFF5E35B1),
+  Color(0xFF2D9CDB),
+];
+
 class PieChartCard extends StatelessWidget {
   final String title;
   final Map<String, int> data;
-  const PieChartCard({
-    required this.title,
-    required this.data,
-    super.key,
-  });
+  const PieChartCard({required this.title, required this.data, super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Text('Pie Chart Placeholder', style: Theme.of(context).textTheme.titleMedium);
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final maxWidth = constraints.hasBoundedWidth
+                ? constraints.maxWidth
+                : 320.0;
+            final isCompact = maxWidth < 320;
+            final chart = SizedBox(
+              height: isCompact ? 180 : 240,
+              width: maxWidth,
+              child: PieChart(_buildChartData(maxWidth)),
+            );
+            final legend = _PieChartLegend(data: data);
+            final useSideBySideLayout = maxWidth >= 480;
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(title, style: Theme.of(context).textTheme.titleMedium),
+                const SizedBox(height: 16),
+                if (useSideBySideLayout)
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Expanded(child: chart),
+                      const SizedBox(width: 16),
+                      Flexible(child: legend),
+                    ],
+                  )
+                else ...[
+                  chart,
+                  const SizedBox(height: 16),
+                  legend,
+                ],
+              ],
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  PieChartData _buildChartData(double width) {
+    final centerSpaceRadius = width < 320 ? 46.0 : 64.0;
+    final sectionRadius = width < 320 ? 34.0 : 48.0;
+
+    return PieChartData(
+      centerSpaceRadius: centerSpaceRadius,
+      sectionsSpace: 3,
+      sections: data.entries.map((entry) {
+        final index = data.keys.toList().indexOf(entry.key);
+        final color =
+            _analyticsChartColors[index % _analyticsChartColors.length];
+        return PieChartSectionData(
+          value: entry.value.toDouble(),
+          title: '',
+          color: color,
+          radius: sectionRadius,
+        );
+      }).toList(),
+    );
+  }
+}
+
+class _PieChartLegend extends StatelessWidget {
+  final Map<String, int> data;
+
+  const _PieChartLegend({required this.data});
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final maxWidth = constraints.hasBoundedWidth
+            ? constraints.maxWidth
+            : 320.0;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: data.entries.map((entry) {
+            final index = data.keys.toList().indexOf(entry.key);
+            final color =
+                _analyticsChartColors[index % _analyticsChartColors.length];
+            return Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4),
+              child: SizedBox(
+                width: maxWidth,
+                child: Row(
+                  children: [
+                    Container(
+                      width: 16,
+                      height: 16,
+                      decoration: BoxDecoration(
+                        color: color,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '${entry.key}: ${Formatters.formatDurationFromSeconds(entry.value)}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          fontSize: maxWidth < 320 ? 12 : 14,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }).toList(),
+        );
+      },
+    );
+  }
+}
+
+class BarChartCard extends StatelessWidget {
+  final String title;
+  final Map<String, int> data;
+
+  const BarChartCard({required this.title, required this.data, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = data.entries.toList();
+    final maxSeconds = data.values.fold<int>(
+      0,
+      (currentMax, value) => value > currentMax ? value : currentMax,
+    );
+    final maxHours = maxSeconds / 3600;
+    final maxY = maxHours <= 1 ? 1.0 : maxHours * 1.2;
+
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 16),
+            SizedBox(
+              height: 260,
+              child: entries.isEmpty
+                  ? const Center(child: Text('No category data'))
+                  : BarChart(
+                      BarChartData(
+                        maxY: maxY,
+                        minY: 0,
+                        alignment: BarChartAlignment.spaceAround,
+                        gridData: FlGridData(
+                          show: true,
+                          drawVerticalLine: false,
+                          horizontalInterval: maxY / 4,
+                          getDrawingHorizontalLine: (value) => FlLine(
+                            color: Colors.grey.withValues(alpha: 0.24),
+                            strokeWidth: 1,
+                          ),
+                        ),
+                        barGroups: entries.map((entry) {
+                          final index = entries.indexOf(entry);
+                          return BarChartGroupData(
+                            x: index,
+                            barRods: [
+                              BarChartRodData(
+                                toY: entry.value / 3600,
+                                width: 18,
+                                borderRadius: BorderRadius.circular(6),
+                                color: _analyticsChartColors[
+                                    index % _analyticsChartColors.length],
+                              ),
+                            ],
+                          );
+                        }).toList(),
+                        borderData: FlBorderData(
+                          show: true,
+                          border: Border(
+                            left: BorderSide(
+                              color: Colors.grey.withValues(alpha: 0.32),
+                            ),
+                            bottom: BorderSide(
+                              color: Colors.grey.withValues(alpha: 0.32),
+                            ),
+                          ),
+                        ),
+                        titlesData: FlTitlesData(
+                          topTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          rightTitles: const AxisTitles(
+                            sideTitles: SideTitles(showTitles: false),
+                          ),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 34,
+                              interval: maxY / 4,
+                              getTitlesWidget: (value, meta) {
+                                if (value == 0) {
+                                  return const Text(
+                                    '0h',
+                                    style: TextStyle(fontSize: 10),
+                                  );
+                                }
+                                return Text(
+                                  '${value.toStringAsFixed(value < 10 ? 1 : 0)}h',
+                                  style: const TextStyle(fontSize: 10),
+                                );
+                              },
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              getTitlesWidget: (value, meta) {
+                                final index = value.toInt();
+                                if (index < 0 || index >= entries.length) {
+                                  return const SizedBox.shrink();
+                                }
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 8),
+                                  child: SizedBox(
+                                    width: 52,
+                                    child: Text(
+                                      _shortLabel(entries[index].key),
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      textAlign: TextAlign.center,
+                                      style: const TextStyle(fontSize: 10),
+                                    ),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _shortLabel(String label) {
+    if (label.length <= 9) return label;
+    return '${label.substring(0, 8)}...';
   }
 }

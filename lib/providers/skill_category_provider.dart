@@ -361,12 +361,25 @@ class SkillProvider extends ChangeNotifier {
   }
 
   List<LearningSession> getSessionsForSkill(String skillId) {
-    return _learningSessions.where((session) => session.skillId == skillId).toList();
+    return _learningSessions
+        .where((session) => session.skillId == skillId)
+        .toList();
   }
 
-  List<LearningSession> getSessionsForDateRange(DateTime startDate, DateTime endDate) {
-    final normalizedStartDate = DateTime(startDate.year, startDate.month, startDate.day);
-    final normalizedEndDate = DateTime(endDate.year, endDate.month, endDate.day);
+  List<LearningSession> getSessionsForDateRange(
+    DateTime startDate,
+    DateTime endDate,
+  ) {
+    final normalizedStartDate = DateTime(
+      startDate.year,
+      startDate.month,
+      startDate.day,
+    );
+    final normalizedEndDate = DateTime(
+      endDate.year,
+      endDate.month,
+      endDate.day,
+    );
 
     return _learningSessions.where((session) {
       final sessionDate = DateTime(
@@ -376,13 +389,15 @@ class SkillProvider extends ChangeNotifier {
       );
       return sessionDate.isAtSameMomentAs(normalizedStartDate) ||
           sessionDate.isAtSameMomentAs(normalizedEndDate) ||
-          (sessionDate.isAfter(normalizedStartDate) && sessionDate.isBefore(normalizedEndDate));
+          (sessionDate.isAfter(normalizedStartDate) &&
+              sessionDate.isBefore(normalizedEndDate));
     }).toList();
   }
 
   int getTotalTimeForMonth(DateTime month) {
-    return getSessionsForMonth(month)
-        .fold(0, (sum, session) => sum + session.duration);
+    return getSessionsForMonth(
+      month,
+    ).fold(0, (sum, session) => sum + session.duration);
   }
 
   int getTotalSessionsForMonth(DateTime month) {
@@ -481,8 +496,10 @@ class SkillProvider extends ChangeNotifier {
         break;
     }
 
-    return getSessionsForDateRange(startDate, now)
-        .fold(0, (sum, session) => sum + session.duration);
+    return getSessionsForDateRange(
+      startDate,
+      now,
+    ).fold(0, (sum, session) => sum + session.duration);
   }
 
   Map<String, int> getTimeBySkill({int length = 5}) {
@@ -504,11 +521,62 @@ class SkillProvider extends ChangeNotifier {
           (skillTimeMap[skill.name] ?? 0) + session.duration;
     }
 
-    // Sort by time spent and take the top 'length' skills
     final sortedSkills = skillTimeMap.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
-    return Map.fromEntries(sortedSkills.take(length));
+    if (length <= 0 || sortedSkills.length <= length) {
+      return Map.fromEntries(sortedSkills);
+    }
+
+    final topSkills = sortedSkills.take(length).toList();
+    final otherTime = sortedSkills
+        .skip(length)
+        .fold(0, (sum, skill) => sum + skill.value);
+
+    return {...Map.fromEntries(topSkills), 'Other': otherTime};
+  }
+
+  Map<String, int> getTimeByCategory({int length = 5}) {
+    final Map<String, int> categoryTimeMap = {};
+
+    for (var session in _learningSessions) {
+      final skill = _skills.firstWhere(
+        (s) => s.id == session.skillId,
+        orElse: () => Skill(
+          id: session.skillId,
+          name: 'Unknown Skill',
+          description: '',
+          category: 'Unknown Category',
+          totalTimeSpent: 0,
+          sessionsCount: 0,
+        ),
+      );
+      final category = _skillCategories.firstWhere(
+        (category) => category.id == skill.category,
+        orElse: () => SkillCategory(
+          id: skill.category,
+          name: skill.category.isEmpty ? 'Unknown Category' : skill.category,
+          description: '',
+          iconPath: '',
+        ),
+      );
+      categoryTimeMap[category.name] =
+          (categoryTimeMap[category.name] ?? 0) + session.duration;
+    }
+
+    final sortedCategories = categoryTimeMap.entries.toList()
+      ..sort((a, b) => b.value.compareTo(a.value));
+
+    if (length <= 0 || sortedCategories.length <= length) {
+      return Map.fromEntries(sortedCategories);
+    }
+
+    final topCategories = sortedCategories.take(length).toList();
+    final otherTime = sortedCategories
+        .skip(length)
+        .fold(0, (sum, category) => sum + category.value);
+
+    return {...Map.fromEntries(topCategories), 'Other': otherTime};
   }
 }
 
