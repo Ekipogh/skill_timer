@@ -23,6 +23,7 @@ class _TimerScreenState extends State<TimerScreen> {
   final int _refreshRate = 100; // Update every 100 milliseconds
   String _elapsedTime = '00:00:00.000';
   bool _sessionSaved = true;
+  int _targetTime = 0; // Initialize target time to 0
 
   @override
   void initState() {
@@ -150,6 +151,20 @@ class _TimerScreenState extends State<TimerScreen> {
                   TimerDisplay(
                     elapsedTime: _elapsedTime,
                     isRunning: _stopwatch.isRunning,
+                    targetTime: _targetTime > 0 ? _targetTime : null,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  // Target time card
+                  TargetTimeCard(
+                    selectedTargetTime: _targetTime > 0 ? _targetTime : null,
+                    onTargetTimeSelected: (selectedTime) {
+                      // Handle target time selection
+                      setState(() {
+                        _targetTime = selectedTime;
+                      });
+                    },
                   ),
 
                   const SizedBox(height: 40),
