@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
 import 'package:skill_timer/screens/manual_data.dart';
+import 'package:wakelock_plus/wakelock_plus.dart';
 import '../providers/skill_category_provider.dart';
 import '../widgets/widgets.dart';
 
@@ -28,33 +29,55 @@ class _TimerScreenState extends State<TimerScreen> {
     super.initState();
   }
 
+  Future<void> _setWakelockEnabled(bool enabled) async {
+    try {
+      await WakelockPlus.toggle(enable: enabled);
+    } catch (e) {
+      debugPrint('Failed to ${enabled ? 'enable' : 'disable'} wakelock: $e');
+    }
+  }
+
   void _startTimer() {
+    if (_stopwatch.isRunning) {
+      return;
+    }
+
+    _timer?.cancel();
     _timer = Timer.periodic(
       Duration(milliseconds: _refreshRate),
       _timerCallback,
     );
     _stopwatch.start();
-    _sessionSaved = false; // Reset session saved status when timer starts
+    unawaited(_setWakelockEnabled(true));
+    _setElapsedTime(sessionSaved: false);
   }
 
   void _stopTimer() {
     _timer?.cancel();
+    _timer = null;
     _stopwatch.stop();
+    unawaited(_setWakelockEnabled(false));
+    _setElapsedTime();
   }
 
-  void _updateElapsedTime() {
+  void _setElapsedTime({bool? sessionSaved}) {
+    if (!mounted) {
+      return;
+    }
+
     final elapsed = _stopwatch.elapsed;
     setState(() {
       _elapsedTime = TimeFormatter.formatWithMilliseconds(elapsed);
+      if (sessionSaved != null) {
+        _sessionSaved = sessionSaved;
+      }
     });
   }
 
   void _timerCallback(Timer timer) {
-    setState(() {
-      if (_stopwatch.isRunning) {
-        _updateElapsedTime();
-      }
-    });
+    if (_stopwatch.isRunning) {
+      _setElapsedTime();
+    }
   }
 
   @override
@@ -136,13 +159,11 @@ class _TimerScreenState extends State<TimerScreen> {
                       ? PauseButton(
                           onPressed: () {
                             _stopTimer();
-                            setState(() {});
                           },
                         )
                       : StartButton(
                           onPressed: () {
                             _startTimer();
-                            setState(() {});
                           },
                         ),
 
@@ -186,6 +207,10 @@ class _TimerScreenState extends State<TimerScreen> {
                   elapsedTime: _elapsedTime,
                 );
                 if (!shouldSave) {
+                  return;
+                }
+
+                if (!context.mounted) {
                   return;
                 }
 
@@ -233,6 +258,7 @@ class _TimerScreenState extends State<TimerScreen> {
   void dispose() {
     _timer?.cancel();
     _stopwatch.stop();
+    unawaited(_setWakelockEnabled(false));
     super.dispose();
   }
 }
