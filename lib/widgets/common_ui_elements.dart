@@ -41,25 +41,17 @@ class StatBadge extends StatelessWidget {
 }
 
 class TimeBadge extends StatBadge {
-  const TimeBadge({
-    required String time,
-    super.key,
-  }) : super(
-          icon: Icons.timer,
-          value: time,
-          color: Colors.green,
-        );
+  const TimeBadge({required String time, super.key})
+    : super(icon: Icons.timer, value: time, color: Colors.green);
 }
 
 class SessionsBadge extends StatBadge {
-  const SessionsBadge({
-    required int sessions,
-    super.key,
-  }) : super(
-          icon: Icons.analytics,
-          value: '$sessions sessions',
-          color: Colors.blue,
-        );
+  const SessionsBadge({required int sessions, super.key})
+    : super(
+        icon: Icons.analytics,
+        value: '$sessions sessions',
+        color: Colors.blue,
+      );
 }
 
 class ActionButton extends StatelessWidget {
@@ -122,50 +114,42 @@ class ActionButton extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: backgroundColor,
         foregroundColor: foregroundColor ?? Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(8),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
   }
 }
 
 class StartButton extends ActionButton {
-  const StartButton({
-    required VoidCallback onPressed,
-    super.key,
-  }) : super(
-          icon: Icons.play_arrow,
-          label: 'Start',
-          onPressed: onPressed,
-          backgroundColor: Colors.green,
-          isCircular: true,
-        );
+  const StartButton({required VoidCallback onPressed, super.key})
+    : super(
+        icon: Icons.play_arrow,
+        label: 'Start',
+        onPressed: onPressed,
+        backgroundColor: Colors.green,
+        isCircular: true,
+      );
 }
 
 class PauseButton extends ActionButton {
-  const PauseButton({
-    required VoidCallback onPressed,
-    super.key,
-  }) : super(
-          icon: Icons.pause,
-          label: 'Pause',
-          onPressed: onPressed,
-          backgroundColor: Colors.red,
-          isCircular: true,
-        );
+  const PauseButton({required VoidCallback onPressed, super.key})
+    : super(
+        icon: Icons.pause,
+        label: 'Pause',
+        onPressed: onPressed,
+        backgroundColor: Colors.red,
+        isCircular: true,
+      );
 }
 
 class SaveButton extends ActionButton {
-  const SaveButton({
-    required VoidCallback onPressed,
-    super.key,
-  }) : super(
-          icon: Icons.save,
-          label: 'Save Session',
-          onPressed: onPressed,
-          backgroundColor: Colors.blue,
-        );
+  const SaveButton({required VoidCallback onPressed, super.key})
+    : super(
+        icon: Icons.save,
+        label: 'Save Session',
+        onPressed: onPressed,
+        backgroundColor: Colors.blue,
+      );
 }
 
 class CustomSnackBar {
@@ -181,9 +165,7 @@ class CustomSnackBar {
         content: Text(message),
         backgroundColor: backgroundColor,
         behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
         action: action,
         duration: duration,
       ),
@@ -224,10 +206,7 @@ class CustomSnackBar {
     show(
       context,
       message: message,
-      action: SnackBarAction(
-        label: 'UNDO',
-        onPressed: onUndo,
-      ),
+      action: SnackBarAction(label: 'UNDO', onPressed: onUndo),
     );
   }
 }
@@ -235,12 +214,28 @@ class CustomSnackBar {
 class TimerDisplay extends StatelessWidget {
   final String elapsedTime;
   final bool isRunning;
+  final int? targetTime;
 
   const TimerDisplay({
     required this.elapsedTime,
     required this.isRunning,
+    this.targetTime,
     super.key,
   });
+
+  bool get _targetMet {
+    if (targetTime == null) return false;
+    final elapsedSeconds = _parseElapsedTimeToSeconds(elapsedTime);
+    return elapsedSeconds >= targetTime! * 60;
+  }
+
+  int _parseElapsedTimeToSeconds(String elapsedTime) {
+    final parts = elapsedTime.split(':');
+    final hours = int.parse(parts[0]);
+    final minutes = int.parse(parts[1]);
+    final seconds = int.parse(parts[2].split('.').first);
+    return hours * 3600 + minutes * 60 + seconds;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -280,6 +275,18 @@ class TimerDisplay extends StatelessWidget {
             ),
             child: Text(elapsedTime),
           ),
+          if (targetTime != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              "${_targetMet ? '✅ ' : ''}${TimeString.format(targetTime! * 60)}",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: _targetMet
+                    ? Colors.green
+                    : colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ],
           const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -288,7 +295,9 @@ class TimerDisplay extends StatelessWidget {
                 width: 12,
                 height: 12,
                 decoration: BoxDecoration(
-                  color: isRunning ? Colors.green : Colors.grey,
+                  color: _targetMet
+                      ? Colors.green
+                      : (isRunning ? Colors.green : Colors.grey),
                   shape: BoxShape.circle,
                 ),
               ),
@@ -311,17 +320,12 @@ class TimerDisplay extends StatelessWidget {
 class StatsCard extends StatelessWidget {
   final List<StatItem> stats;
 
-  const StatsCard({
-    required this.stats,
-    super.key,
-  });
+  const StatsCard({required this.stats, super.key});
 
   @override
   Widget build(BuildContext context) {
     return Card(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -332,7 +336,9 @@ class StatsCard extends StatelessWidget {
                 Container(
                   width: 1,
                   height: 40,
-                  color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.3),
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.outline.withValues(alpha: 0.3),
                 ),
             ],
           ],
@@ -363,11 +369,7 @@ class StatItem extends StatelessWidget {
 
     return Column(
       children: [
-        Icon(
-          icon,
-          color: iconColor ?? colorScheme.primary,
-          size: 24,
-        ),
+        Icon(icon, color: iconColor ?? colorScheme.primary, size: 24),
         const SizedBox(height: 8),
         Text(
           value,
@@ -399,5 +401,103 @@ class TimeFormatter {
         '${(elapsed.inMinutes % 60).toString().padLeft(2, '0')}:'
         '${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}'
         '.${(elapsed.inMilliseconds % 1000).toString().padLeft(3, '0')}';
+  }
+}
+
+class TimeString {
+  static String format(int seconds) {
+    final hours = seconds ~/ 3600;
+    final minutes = (seconds % 3600) ~/ 60;
+    final secs = seconds % 60;
+
+    return '${hours.toString().padLeft(2, '0')}:'
+        '${minutes.toString().padLeft(2, '0')}:'
+        '${secs.toString().padLeft(2, '0')}';
+  }
+}
+
+class TargetTimeCard extends StatelessWidget {
+  final ValueChanged<int> onTargetTimeSelected;
+  final int? selectedTargetTime;
+  static const List<int> _targetTimeOptions = [
+    1,
+    15,
+    30,
+    60,
+    120,
+    300,
+  ]; // in minutes
+
+  const TargetTimeCard({
+    required this.onTargetTimeSelected,
+    this.selectedTargetTime,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: _targetTimeOptions.map((option) {
+            final isSelected = selectedTargetTime == option;
+
+            return Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () => onTargetTimeSelected(option),
+                borderRadius: BorderRadius.circular(8),
+                splashColor: colorScheme.primary.withValues(alpha: 0.16),
+                highlightColor: colorScheme.primary.withValues(alpha: 0.08),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 8,
+                  ),
+                  decoration: BoxDecoration(
+                    color: isSelected
+                        ? colorScheme.primary.withValues(alpha: 0.12)
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: isSelected
+                          ? colorScheme.primary
+                          : colorScheme.outline.withValues(alpha: 0.3),
+                      width: isSelected ? 1.5 : 1,
+                    ),
+                  ),
+                  child: AnimatedDefaultTextStyle(
+                    duration: const Duration(milliseconds: 180),
+                    curve: Curves.easeOut,
+                    style:
+                        theme.textTheme.bodyMedium?.copyWith(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurface.withValues(alpha: 0.7),
+                        ) ??
+                        TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: isSelected
+                              ? colorScheme.primary
+                              : colorScheme.onSurface.withValues(alpha: 0.7),
+                        ),
+                    child: Text('${option}m'),
+                  ),
+                ),
+              ),
+            );
+          }).toList(),
+        ),
+      ),
+    );
   }
 }
