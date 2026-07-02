@@ -154,7 +154,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
             child: Row(
               children: [
                 TimeBadge(
-                  time: Formatters.formatDurationFromMilliseconds(
+                  time: Formatters.formatDurationFromSeconds(
                     skill.totalTimeSpent,
                   ),
                 ),
