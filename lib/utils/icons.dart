@@ -27,6 +27,9 @@ const Map<String, IconData> iconMap = {
   'sports_baseball': Icons.sports_baseball,
   'directions_bike': Icons.directions_bike,
   'directions_boat': Icons.directions_boat,
+  'water': Icons.water,
+  'sports_gymnastics': Icons.sports_gymnastics,
+
 };
 
 IconData getIcon({required String iconName}) {

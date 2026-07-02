@@ -5,6 +5,7 @@ class Skill {
   final String category;
   final int totalTimeSpent; // in seconds
   final int sessionsCount;
+  final String? iconPath; // Path to the icon asset
 
   Skill({
     required this.id,
@@ -13,6 +14,7 @@ class Skill {
     required this.category,
     this.totalTimeSpent = 0,
     this.sessionsCount = 0,
+    this.iconPath = "psychology",
   });
 
   Map<String, dynamic> toMap() {
@@ -20,7 +22,8 @@ class Skill {
       'id': id,
       'name': name,
       'description': description,
-      'category': category
+      'category': category,
+      'iconPath': iconPath,
     };
   }
 
@@ -36,6 +39,7 @@ class Skill {
       category: json['category'],
       totalTimeSpent: json['totalTimeSpent'] ?? 0,
       sessionsCount: json['sessionsCount'] ?? 0,
+      iconPath: json['iconPath']
     );
   }
 
@@ -47,6 +51,7 @@ class Skill {
     String? category,
     int? totalTimeSpent,
     int? sessionsCount,
+    String? iconPath,
   }) {
     return Skill(
       id: id ?? this.id,
@@ -55,6 +60,7 @@ class Skill {
       category: category ?? this.category,
       totalTimeSpent: totalTimeSpent ?? this.totalTimeSpent,
       sessionsCount: sessionsCount ?? this.sessionsCount,
+      iconPath: iconPath ?? this.iconPath,
     );
   }
 

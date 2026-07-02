@@ -67,6 +67,9 @@ class DBProvider {
       case 1:
         await _migrationV1(db);
         break;
+      case 2:
+        await _migrationV2(db);
+        break;
       // Add new migrations here as you update your schema
       default:
         throw Exception('Unknown migration version: $version');
@@ -117,6 +120,22 @@ class DBProvider {
     );
     await db.execute(
       'CREATE INDEX idx_timer_sessions_date ON timer_sessions(datePerformed)',
+    );
+  }
+
+  /// Migration V2: Ensure skills.iconPath exists and backfill defaults
+  Future<void> _migrationV2(Database db) async {
+    print('Running migration V2: Ensure skill iconPath defaults');
+
+    final columns = await db.rawQuery('PRAGMA table_info(skills)');
+    final hasIconPath = columns.any((column) => column['name'] == 'iconPath');
+
+    if (!hasIconPath) {
+      await db.execute('ALTER TABLE skills ADD COLUMN iconPath TEXT');
+    }
+
+    await db.execute(
+      "UPDATE skills SET iconPath = 'psychology' WHERE iconPath IS NULL OR TRIM(iconPath) = ''",
     );
   }
 

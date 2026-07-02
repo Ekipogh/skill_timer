@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:skill_timer/models/skill.dart';
+import 'package:skill_timer/screens/icon_selector.dart';
 import 'common_containers.dart';
+import '../utils/icons.dart';
+
+enum FieldTypes { text, icon }
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -50,6 +53,90 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
+class CustomIconField extends StatelessWidget {
+  final String iconPath;
+  final String labelText;
+  final ValueChanged<String> onChanged;
+
+  const CustomIconField({
+    required this.iconPath,
+    required this.labelText,
+    required this.onChanged,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final selectedIcon = iconMap[iconPath] ?? Icons.image;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: () async {
+        final selectedIconPath = await Navigator.push<String>(
+          context,
+          MaterialPageRoute(
+            builder: (context) => IconSelector(selectedIconPath: iconPath),
+          ),
+        );
+
+        if (selectedIconPath != null) {
+          onChanged(selectedIconPath);
+        }
+      },
+      child: InputDecorator(
+        decoration: InputDecoration(
+          labelText: labelText,
+          border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 12,
+          ),
+        ),
+        child: Row(
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: colorScheme.primary.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(
+                selectedIcon,
+                color: colorScheme.primary,
+                size: 26,
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                _formatIconName(iconPath),
+                style: Theme.of(context).textTheme.bodyLarge,
+              ),
+            ),
+            Icon(
+              Icons.chevron_right,
+              color: colorScheme.onSurface.withValues(alpha: 0.6),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  String _formatIconName(String iconPath) {
+    return iconPath
+        .split('_')
+        .map(
+          (word) => word.isEmpty
+              ? word
+              : '${word[0].toUpperCase()}${word.substring(1)}',
+        )
+        .join(' ');
+  }
+}
+
 class FormDialog extends StatefulWidget {
   final String title;
   final IconData titleIcon;
@@ -86,7 +173,10 @@ class _FormDialogState extends State<FormDialog> {
     super.initState();
     controllers = {
       for (var field in widget.fields)
-        field.key: TextEditingController(text: field.initialValue),
+        field.key: TextEditingController(
+          text: field.initialValue ??
+              (field.type == FieldTypes.icon ? field.iconPath : null),
+        ),
     };
   }
 
@@ -122,18 +212,29 @@ class _FormDialogState extends State<FormDialog> {
       ),
       content: Column(
         mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           ...widget.fields.map(
             (field) => Padding(
               padding: const EdgeInsets.only(bottom: 16),
-              child: CustomTextField(
-                controller: controllers[field.key]!,
-                labelText: field.label,
-                prefixIcon: field.icon,
-                maxLines: field.maxLines,
-                textCapitalization: field.textCapitalization,
-                hintText: field.hintText,
-              ),
+              child: field.type == FieldTypes.icon
+                  ? CustomIconField(
+                      iconPath: controllers[field.key]!.text,
+                      labelText: field.label,
+                      onChanged: (selectedIconPath) {
+                        setState(() {
+                          controllers[field.key]!.text = selectedIconPath;
+                        });
+                      },
+                    )
+                  : CustomTextField(
+                      controller: controllers[field.key]!,
+                      labelText: field.label,
+                      prefixIcon: field.icon,
+                      maxLines: field.maxLines,
+                      textCapitalization: field.textCapitalization,
+                      hintText: field.hintText,
+                    ),
             ),
           ),
           if (widget.additionalInfo != null) ...[
@@ -219,6 +320,8 @@ class FormField {
   final String? hintText;
   final String? initialValue;
   final bool required;
+  final FieldTypes type;
+  final String iconPath; // For icon fields
 
   const FormField({
     required this.key,
@@ -229,12 +332,14 @@ class FormField {
     this.hintText,
     this.initialValue,
     this.required = true,
+    this.type = FieldTypes.text,
+    this.iconPath = "psychology", // Default icon path
   });
 }
 
 // Predefined form dialogs for common use cases
 class AddSkillDialog extends StatelessWidget {
-  final Function(String name, String description) onConfirm;
+  final Function(String name, String description, String iconPath) onConfirm;
 
   const AddSkillDialog({required this.onConfirm, super.key});
 
@@ -246,9 +351,18 @@ class AddSkillDialog extends StatelessWidget {
       titleIconColor: Colors.blue,
       fields: const [
         FormField(
+          key: 'icon',
+          label: 'Icon',
+          icon: Icons.image,
+          textCapitalization: TextCapitalization.none,
+          required: true,
+          type: FieldTypes.icon,
+          iconPath: "psychology", // Default icon path
+        ),
+        FormField(
           key: 'name',
           label: 'Skill Name',
-          icon: Icons.psychology,
+          icon: Icons.label,
           textCapitalization: TextCapitalization.words,
           required: true,
         ),
@@ -265,14 +379,14 @@ class AddSkillDialog extends StatelessWidget {
         text: 'Skills help you track specific learning goals',
       ),
       onConfirm: (values) {
-        onConfirm(values['name']!, values['description']!);
+        onConfirm(values['name']!, values['description']!, values['icon']!);
       },
     );
   }
 
   static Future<void> show(
     BuildContext context, {
-    required Function(String name, String description) onConfirm,
+    required Function(String name, String description, String iconPath) onConfirm,
   }) {
     return showDialog(
       context: context,
@@ -285,11 +399,13 @@ class AddSkillDialog extends StatelessWidget {
 class EditSkillDialog extends StatelessWidget {
   final String initialName;
   final String initialDescription;
-  final Function(String name, String description) onConfirm;
+  final String initialIconPath;
+  final Function(String name, String description, String iconPath) onConfirm;
 
   const EditSkillDialog({
     required this.initialName,
     required this.initialDescription,
+    required this.initialIconPath,
     required this.onConfirm,
     super.key,
   });
@@ -303,9 +419,18 @@ class EditSkillDialog extends StatelessWidget {
       confirmColor: Colors.orange,
       fields: [
         FormField(
+          key: 'icon',
+          label: 'Icon',
+          icon: Icons.image,
+          textCapitalization: TextCapitalization.none,
+          initialValue: initialIconPath, // Default icon path
+          required: true,
+          type: FieldTypes.icon,
+        ),
+        FormField(
           key: 'name',
           label: 'Skill Name',
-          icon: Icons.psychology,
+          icon: Icons.label,
           textCapitalization: TextCapitalization.words,
           initialValue: initialName,
           required: true,
@@ -321,7 +446,7 @@ class EditSkillDialog extends StatelessWidget {
         ),
       ],
       onConfirm: (values) {
-        onConfirm(values['name']!, values['description']!);
+        onConfirm(values['name']!, values['description']!, values['icon']!);
       },
     );
   }
@@ -330,7 +455,8 @@ class EditSkillDialog extends StatelessWidget {
     BuildContext context, {
     required String initialName,
     required String initialDescription,
-    required Function(String name, String description) onConfirm,
+    required String initialIconPath,
+    required Function(String name, String description, String iconPath) onConfirm,
   }) {
     return showDialog(
       context: context,
@@ -338,6 +464,7 @@ class EditSkillDialog extends StatelessWidget {
       builder: (context) => EditSkillDialog(
         initialName: initialName,
         initialDescription: initialDescription,
+        initialIconPath: initialIconPath,
         onConfirm: onConfirm,
       ),
     );
@@ -345,7 +472,7 @@ class EditSkillDialog extends StatelessWidget {
 }
 
 class AddCategoryDialog extends StatelessWidget {
-  final Function(String name, String description) onConfirm;
+  final Function(String name, String description, String iconPath) onConfirm;
 
   const AddCategoryDialog({required this.onConfirm, super.key});
 
@@ -356,6 +483,15 @@ class AddCategoryDialog extends StatelessWidget {
       titleIcon: Icons.add,
       titleIconColor: Colors.blue,
       fields: const [
+        FormField(
+          key: 'icon',
+          label: 'Icon',
+          icon: Icons.image,
+          textCapitalization: TextCapitalization.none,
+          required: true,
+          type: FieldTypes.icon,
+          iconPath: "psychology", // Default icon path
+        ),
         FormField(
           key: 'name',
           label: 'Name',
@@ -376,14 +512,15 @@ class AddCategoryDialog extends StatelessWidget {
         text: 'Categories help organize your learning goals',
       ),
       onConfirm: (values) {
-        onConfirm(values['name']!, values['description']!);
+        onConfirm(values['name']!, values['description']!, values['icon']!);
       },
     );
   }
 
   static Future<void> show(
     BuildContext context, {
-    required Function(String name, String description) onConfirm,
+    required Function(String name, String description, String iconPath)
+        onConfirm,
   }) {
     return showDialog(
       context: context,
@@ -396,11 +533,13 @@ class AddCategoryDialog extends StatelessWidget {
 class EditCategoryDialog extends StatelessWidget {
   final String initialName;
   final String initialDescription;
-  final Function(String name, String description) onConfirm;
+  final String initialIconPath;
+  final Function(String name, String description, String iconPath) onConfirm;
 
   const EditCategoryDialog({
     required this.initialName,
     required this.initialDescription,
+    required this.initialIconPath,
     required this.onConfirm,
     super.key,
   });
@@ -413,6 +552,15 @@ class EditCategoryDialog extends StatelessWidget {
       titleIconColor: Colors.orange,
       confirmColor: Colors.orange,
       fields: [
+        FormField(
+          key: 'icon',
+          label: 'Icon',
+          icon: Icons.image,
+          textCapitalization: TextCapitalization.none,
+          initialValue: initialIconPath,
+          required: true,
+          type: FieldTypes.icon,
+        ),
         FormField(
           key: 'name',
           label: 'Name',
@@ -432,7 +580,7 @@ class EditCategoryDialog extends StatelessWidget {
         ),
       ],
       onConfirm: (values) {
-        onConfirm(values['name']!, values['description']!);
+        onConfirm(values['name']!, values['description']!, values['icon']!);
       },
     );
   }
@@ -441,7 +589,9 @@ class EditCategoryDialog extends StatelessWidget {
     BuildContext context, {
     required String initialName,
     required String initialDescription,
-    required Function(String name, String description) onConfirm,
+    required String initialIconPath,
+    required Function(String name, String description, String iconPath)
+        onConfirm,
   }) {
     return showDialog(
       context: context,
@@ -449,6 +599,7 @@ class EditCategoryDialog extends StatelessWidget {
       builder: (context) => EditCategoryDialog(
         initialName: initialName,
         initialDescription: initialDescription,
+        initialIconPath: initialIconPath,
         onConfirm: onConfirm,
       ),
     );

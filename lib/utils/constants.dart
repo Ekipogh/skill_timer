@@ -9,12 +9,12 @@ class AppConstants {
   static const bool isDevelopmentMode = true; // Set to false for production
 
   // Database version - increment this when you add new migrations
-  static const int databaseVersion = 1;
+  static const int databaseVersion = 2;
 
   // Database migration history (for documentation)
   static const Map<int, String> migrationHistory = {
     1: 'Initial schema with skill_categories and skills tables',
-    // 2: 'Add timer_sessions table for detailed session tracking',
+    2: 'Ensure skills.iconPath exists and backfill default icon values',
     // 3: 'Add user_preferences table and skill colors',
   };
 }

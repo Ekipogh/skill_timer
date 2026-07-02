@@ -206,7 +206,9 @@ class _HomeScreenState extends State<HomeScreen> {
               child: Icon(
                 Icons.arrow_forward_ios,
                 size: 16,
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(
+                  context,
+                ).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
             ),
             onTap: () => _onSkillCategoryTap(skillCategory),
@@ -313,12 +315,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void _showAddSkillCategoryDialog() {
     AddCategoryDialog.show(
       context,
-      onConfirm: (name, description) {
+      onConfirm: (name, description, iconPath) {
         final newCategory = SkillCategory(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           name: name,
           description: description,
-          iconPath: 'school', // Default icon
+          iconPath: iconPath,
         );
         context.read<SkillProvider>().addSkillCategory(newCategory);
       },
@@ -330,10 +332,12 @@ class _HomeScreenState extends State<HomeScreen> {
       context,
       initialName: skillCategory.name,
       initialDescription: skillCategory.description,
-      onConfirm: (name, description) {
+      initialIconPath: skillCategory.iconPath,
+      onConfirm: (name, description, iconPath) {
         final updatedCategory = skillCategory.copyWith(
           name: name,
           description: description,
+          iconPath: iconPath,
         );
         context.read<SkillProvider>().updateSkillCategory(updatedCategory);
       },
