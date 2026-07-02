@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/utils/formatters.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../providers/skill_category_provider.dart';
@@ -143,7 +144,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
             right: 16,
             child: Row(
               children: [
-                TimeBadge(time: _formatTime(skill.totalTimeSpent)),
+                TimeBadge(time: Formatters.formatDurationFromSeconds(skill.totalTimeSpent)),
                 const SizedBox(width: 8),
                 SessionsBadge(sessions: skill.sessionsCount),
               ],
@@ -210,10 +211,6 @@ class _SkillsScreenState extends State<SkillsScreen> {
         context.read<SkillProvider>().updateSkill(updatedSkill);
       },
     );
-  }
-
-  String _formatTime(int seconds) {
-    return TimeFormatter.format(seconds);
   }
 
   Future<bool> _showDeleteConfirmationDialog(Skill skill) async {

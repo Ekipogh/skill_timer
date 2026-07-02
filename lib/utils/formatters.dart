@@ -1,3 +1,5 @@
+import 'package:skill_timer/widgets/common_ui_elements.dart';
+
 /// Utility class containing common formatting functions used throughout the app.
 /// These functions provide consistent formatting for dates, durations, and other data.
 abstract class Formatters {
@@ -200,5 +202,12 @@ abstract class Formatters {
         .split(' ')
         .map((word) => word.isEmpty ? word : capitalize(word))
         .join(' ');
+  }
+
+  /// Formats a duration in seconds to a human-readable string.
+  ///
+  /// Example: formatDurationFromSeconds(3661) → "1h 1m 1s"
+  static String formatDurationFromSeconds(int seconds) {
+    return TimeFormatter.format(seconds);
   }
 }
