@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/utils/formatters.dart';
+import 'package:skill_timer/utils/icons.dart';
 import '../models/skill_category.dart';
 import '../models/skill.dart';
 import '../providers/skill_category_provider.dart';
@@ -62,7 +63,8 @@ class _SkillsScreenState extends State<SkillsScreen> {
                   return EmptyStateCard(
                     icon: Icons.psychology_outlined,
                     title: 'No skills in ${widget.category.name} yet',
-                    subtitle: 'Add your first skill to start tracking your progress',
+                    subtitle:
+                        'Add your first skill to start tracking your progress',
                     buttonText: 'Add First Skill',
                     onButtonPressed: _addNewSkill,
                     additionalInfo: const TipContainer(
@@ -117,7 +119,9 @@ class _SkillsScreenState extends State<SkillsScreen> {
       child: Stack(
         children: [
           IconCard(
-            icon: Icons.psychology,
+            icon: skill.iconPath != null
+                ? getIcon(iconName: skill.iconPath!)
+                : Icons.psychology,
             title: skill.name,
             subtitle: skill.description.isNotEmpty ? skill.description : null,
             trailing: Container(
@@ -134,7 +138,12 @@ class _SkillsScreenState extends State<SkillsScreen> {
             ),
             onTap: () => _startTimer(skill),
             margin: const EdgeInsets.only(bottom: 12),
-            padding: const EdgeInsets.fromLTRB(16, 16, 16, 56), // Extra bottom padding for badges
+            padding: const EdgeInsets.fromLTRB(
+              16,
+              16,
+              16,
+              56,
+            ), // Extra bottom padding for badges
           ),
           DraggableIndicator(key: Key('draggable_icon_${skill.id}')),
           // Stats badges - positioned to avoid overlap
@@ -144,7 +153,11 @@ class _SkillsScreenState extends State<SkillsScreen> {
             right: 16,
             child: Row(
               children: [
-                TimeBadge(time: Formatters.formatDurationFromSeconds(skill.totalTimeSpent)),
+                TimeBadge(
+                  time: Formatters.formatDurationFromSeconds(
+                    skill.totalTimeSpent,
+                  ),
+                ),
                 const SizedBox(width: 8),
                 SessionsBadge(sessions: skill.sessionsCount),
               ],
@@ -171,12 +184,13 @@ class _SkillsScreenState extends State<SkillsScreen> {
   void _showAddSkillDialog() {
     AddSkillDialog.show(
       context,
-      onConfirm: (name, description) {
+      onConfirm: (name, description, iconPath) {
         final newSkill = Skill(
           id: DateTime.now().millisecondsSinceEpoch.toString(),
           name: name,
           description: description,
           category: widget.category.id,
+          iconPath: iconPath,
         );
         context.read<SkillProvider>().addSkill(newSkill);
       },
@@ -201,12 +215,14 @@ class _SkillsScreenState extends State<SkillsScreen> {
       context,
       initialName: skill.name,
       initialDescription: skill.description,
-      onConfirm: (name, description) {
+      initialIconPath: skill.iconPath ?? 'psychology',
+      onConfirm: (name, description, iconPath) {
         final updatedSkill = Skill(
           id: skill.id,
           name: name,
           description: description,
-          category: skill.category
+          category: skill.category,
+          iconPath: iconPath,
         );
         context.read<SkillProvider>().updateSkill(updatedSkill);
       },

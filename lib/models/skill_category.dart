@@ -8,7 +8,7 @@ class SkillCategory {
     required this.id,
     required this.name,
     required this.description,
-    required this.iconPath,
+    this.iconPath = "psychology",
   });
 
   Map<String, dynamic> toMap() {
@@ -25,12 +25,12 @@ class SkillCategory {
     return 'SkillCategory(id: $id, name: $name, description: $description, iconPath: $iconPath)';
   }
 
-  SkillCategory copyWith({required String name, required String description}) {
+  SkillCategory copyWith({String? name, String? description, String? iconPath}) {
     return SkillCategory(
       id: id,
-      name: name,
-      description: description,
-      iconPath: iconPath,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      iconPath: iconPath ?? this.iconPath,
     );
   }
 }

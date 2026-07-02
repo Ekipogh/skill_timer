@@ -228,6 +228,7 @@ class SkillProvider extends ChangeNotifier {
           category: map['category'],
           totalTimeSpent: totalTimeSpent,
           sessionsCount: sessionsCount,
+          iconPath: map['iconPath'],
         );
       }).toList();
     } catch (e) {
