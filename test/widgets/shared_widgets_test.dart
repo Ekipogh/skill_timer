@@ -25,7 +25,7 @@ void main() {
         const MaterialApp(
           home: Scaffold(
             body: TimerDisplay(
-              elapsedTime: '00:05:30.123',
+              elapsedTime: Duration(minutes: 5, seconds: 30, milliseconds: 123),
               isRunning: true,
             ),
           ),

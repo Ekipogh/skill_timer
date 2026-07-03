@@ -213,9 +213,9 @@ class CustomSnackBar {
 }
 
 class TimerDisplay extends StatelessWidget {
-  final String elapsedTime;
+  final Duration elapsedTime;
   final bool isRunning;
-  final int? targetTime;
+  final Duration? targetTime;
 
   const TimerDisplay({
     required this.elapsedTime,
@@ -226,16 +226,7 @@ class TimerDisplay extends StatelessWidget {
 
   bool get _targetMet {
     if (targetTime == null) return false;
-    final elapsedSeconds = _parseElapsedTimeToSeconds(elapsedTime);
-    return elapsedSeconds >= targetTime! * 60;
-  }
-
-  int _parseElapsedTimeToSeconds(String elapsedTime) {
-    final parts = elapsedTime.split(':');
-    final hours = int.parse(parts[0]);
-    final minutes = int.parse(parts[1]);
-    final seconds = int.parse(parts[2].split('.').first);
-    return hours * 3600 + minutes * 60 + seconds;
+    return elapsedTime >= targetTime!;
   }
 
   @override
@@ -274,12 +265,12 @@ class TimerDisplay extends StatelessWidget {
               fontWeight: FontWeight.bold,
               color: colorScheme.onPrimaryContainer,
             ),
-            child: Text(elapsedTime),
+            child: Text(TimeFormatter.formatWithMilliseconds(elapsedTime)),
           ),
           if (targetTime != null) ...[
             const SizedBox(height: 8),
             Text(
-              "${_targetMet ? '✅ ' : ''}${TimeString.format(targetTime! * 60)}",
+              TimeString.format(targetTime!.inSeconds),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: _targetMet
                     ? Colors.green

@@ -256,12 +256,12 @@ class UnsavedChangesDialog extends StatelessWidget {
         children: [
           Text(
             isTimerRunning
-                ? 'Timer is still running. Do you want to exit without saving?'
+                ? 'Timer is still running.'
                 : 'You have unsaved changes. Do you want to exit?',
           ),
           const SizedBox(height: 16),
-          const WarningContainer(
-            text: 'Your session progress will be lost',
+          WarningContainer(
+            text: isTimerRunning ? 'Timer will continue in background' : 'Your session progress will be lost',
           ),
         ],
       ),
@@ -299,3 +299,83 @@ class UnsavedChangesDialog extends StatelessWidget {
         false;
   }
 }
+
+class SaveDiscardCancelDialog extends StatelessWidget {
+  final String skillName;
+  final String elapsedTime;
+
+  const SaveDiscardCancelDialog({
+    required this.skillName,
+    required this.elapsedTime,
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return CustomDialog(
+      title: const DialogTitleRow(
+        icon: Icons.save,
+        title: 'Save or Discard Session',
+        iconColor: Colors.blue,
+      ),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('You have an unsaved session for $skillName.'),
+          const SizedBox(height: 16),
+          Text('Elapsed Time: $elapsedTime'),
+          const SizedBox(height: 16),
+          const WarningContainer(
+            text: 'If you discard, your session progress will be lost.',
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(SaveDiscardCancelResult.cancel),
+          child: const Text('Cancel'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(SaveDiscardCancelResult.discard),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.red,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text('Discard'),
+        ),
+        ElevatedButton(
+          onPressed: () => Navigator.of(context).pop(SaveDiscardCancelResult.save),
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.blue,
+            foregroundColor: Colors.white,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(8),
+            ),
+          ),
+          child: const Text('Save'),
+        ),
+      ],
+    );
+  }
+
+  static Future<SaveDiscardCancelResult?> show(
+    BuildContext context, {
+    required String skillName,
+    required String elapsedTime,
+  }) async {
+    return await showDialog<SaveDiscardCancelResult>(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => SaveDiscardCancelDialog(
+        skillName: skillName,
+        elapsedTime: elapsedTime,
+      ),
+    );
+  }
+}
+
+enum SaveDiscardCancelResult { save, discard, cancel }

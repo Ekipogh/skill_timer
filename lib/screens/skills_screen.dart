@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:skill_timer/providers/time_session_provider.dart';
 import 'package:skill_timer/utils/formatters.dart';
 import 'package:skill_timer/utils/icons.dart';
 import '../models/skill_category.dart';
@@ -173,7 +174,32 @@ class _SkillsScreenState extends State<SkillsScreen> {
     _showAddSkillDialog();
   }
 
-  void _startTimer(Skill skill) {
+  void _startTimer(Skill skill) async {
+    final timerProvider = context.read<TimerSessionProvider>();
+    if (timerProvider.isRunning && timerProvider.currentSkill?.id != skill.id) {
+      SaveDiscardCancelResult? result = await SaveDiscardCancelDialog.show(
+        context,
+        skillName: timerProvider.currentSkill!.name,
+        elapsedTime: Formatters.formatDurationFromSeconds(
+          timerProvider.currentSkill!.totalTimeSpent,
+        ),
+      );
+      switch (result) {
+        case SaveDiscardCancelResult.save:
+          // Save the current session
+          await timerProvider.save(context.read<SkillProvider>());
+          break;
+        case SaveDiscardCancelResult.discard:
+          // Discard the current session
+          await timerProvider.discard();
+          break;
+        case SaveDiscardCancelResult.cancel:
+          // Cancel the action, do not start a new timer
+          return;
+        default:
+          return;
+      }
+    }
     // Navigate to timer screen
     Navigator.push(
       context,
