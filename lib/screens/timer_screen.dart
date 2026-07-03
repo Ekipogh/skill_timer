@@ -47,6 +47,78 @@ class _TimerScreenState extends State<TimerScreen> {
     unawaited(_setWakelockEnabled(false));
   }
 
+  Future<bool> _saveSession(TimerSessionProvider timerProvider) async {
+    if (!timerProvider.canSave) {
+      return false;
+    }
+
+    if (timerProvider.isRunning) {
+      _stopTimer();
+    }
+
+    final skillProvider = context.read<SkillProvider>();
+
+    try {
+      await timerProvider.save(skillProvider);
+
+      if (context.mounted) {
+        CustomSnackBar.showSuccess(
+          context,
+          message: 'Session saved successfully!',
+        );
+      }
+      return true;
+    } catch (e) {
+      if (context.mounted) {
+        CustomSnackBar.showError(
+          context,
+          message: 'Failed to save session: $e',
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<void> _handleExit(TimerSessionProvider timerProvider) async {
+    if (timerProvider.isRunning || !timerProvider.hasUnsavedSession) {
+      unawaited(_setWakelockEnabled(false));
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+      return;
+    }
+
+    final result = await SaveDiscardCancelDialog.show(
+      context,
+      skillName: widget.skill.name,
+      elapsedTime: TimeFormatter.formatWithMilliseconds(
+        timerProvider.elapsedTime,
+      ),
+    );
+    if (!context.mounted) {
+      return;
+    }
+
+    switch (result) {
+      case SaveDiscardCancelResult.save:
+        final saved = await _saveSession(timerProvider);
+        if (context.mounted && saved) {
+          Navigator.pop(context, true);
+        }
+        return;
+      case SaveDiscardCancelResult.discard:
+        await timerProvider.discard();
+        unawaited(_setWakelockEnabled(false));
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+        return;
+      case SaveDiscardCancelResult.cancel:
+      case null:
+        return;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -63,6 +135,7 @@ class _TimerScreenState extends State<TimerScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
+                  settings: const RouteSettings(name: '/manual_data_entry'),
                   builder: (context) =>
                       ManualDataEntryScreen(skill: widget.skill),
                 ),
@@ -79,23 +152,7 @@ class _TimerScreenState extends State<TimerScreen> {
               if (didPop) {
                 return;
               }
-              final bool isRunningOrNotSaved =
-                  timerProvider.isRunning || timerProvider.hasUnsavedSession;
-              if (isRunningOrNotSaved) {
-                final bool shouldPop = await UnsavedChangesDialog.show(
-                  context,
-                  isTimerRunning: timerProvider.isRunning,
-                );
-                if (context.mounted && shouldPop) {
-                  unawaited(_setWakelockEnabled(false));
-                }
-
-                if (context.mounted && shouldPop) {
-                  Navigator.pop(context);
-                }
-              } else {
-                Navigator.pop(context);
-              }
+              await _handleExit(timerProvider);
             },
             child: TimerGradientBackground(
               child: SafeArea(
@@ -187,10 +244,6 @@ class _TimerScreenState extends State<TimerScreen> {
           : SaveButton(
               onPressed: () async {
                 final timerProvider = context.read<TimerSessionProvider>();
-                if (!timerProvider.canSave) {
-                  return; // Do nothing if no time has elapsed
-                }
-
                 final bool shouldSave = await SaveSessionDialog.show(
                   context,
                   skillName: widget.skill.name,
@@ -206,29 +259,9 @@ class _TimerScreenState extends State<TimerScreen> {
                   return;
                 }
 
-                if (timerProvider.isRunning) {
-                  _stopTimer();
-                }
-
-                final skillProvider = context.read<SkillProvider>();
-
-                try {
-                  await timerProvider.save(skillProvider);
-
-                  if (context.mounted) {
-                    CustomSnackBar.showSuccess(
-                      context,
-                      message: 'Session saved successfully!',
-                    );
-                    Navigator.pop(context, true);
-                  }
-                } catch (e) {
-                  if (context.mounted) {
-                    CustomSnackBar.showError(
-                      context,
-                      message: 'Failed to save session: $e',
-                    );
-                  }
+                final saved = await _saveSession(timerProvider);
+                if (context.mounted && saved) {
+                  Navigator.pop(context, true);
                 }
               },
             ),

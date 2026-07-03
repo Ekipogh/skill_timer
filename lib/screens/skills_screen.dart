@@ -203,7 +203,9 @@ class _SkillsScreenState extends State<SkillsScreen> {
     // Navigate to timer screen
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => TimerScreen(skill: skill)),
+      MaterialPageRoute(
+        settings: RouteSettings(name: '/timer/${skill.id}'),
+        builder: (context) => TimerScreen(skill: skill)),
     );
   }
 

@@ -302,6 +302,7 @@ class _HomeScreenState extends State<HomeScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
+        settings: RouteSettings(name: '/skills/${skillCategory.id}'),
         builder: (context) => SkillsScreen(category: skillCategory),
       ),
     );

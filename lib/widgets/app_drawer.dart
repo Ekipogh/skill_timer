@@ -340,7 +340,8 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const SessionReport()),
+      MaterialPageRoute(settings: const RouteSettings(name: '/sessions_report'),
+      builder: (context) => const SessionReport()),
     );
   }
 
@@ -348,7 +349,8 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const AnalyticsScreen()),
+      MaterialPageRoute(settings: const RouteSettings(name: '/analytics'),
+      builder: (context) => const AnalyticsScreen()),
     );
   }
 
@@ -376,7 +378,8 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => const DevDatabaseUtils()),
+      MaterialPageRoute(settings: const RouteSettings(name: '/debug'),
+      builder: (context) => const DevDatabaseUtils()),
     );
   }
 
