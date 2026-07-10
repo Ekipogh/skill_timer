@@ -6,6 +6,7 @@ import 'package:skill_timer/widgets/floating_timer.dart';
 import 'package:skill_timer/providers/skill_category_provider.dart';
 import 'package:skill_timer/providers/time_session_provider.dart';
 import 'package:skill_timer/utils/constants.dart';
+import 'package:skill_timer/providers/foreground_timer_service.dart';
 
 class SkillTimerApp extends StatefulWidget {
   const SkillTimerApp({super.key});
@@ -14,6 +15,16 @@ class SkillTimerApp extends StatefulWidget {
 }
 
 class _SkillTimerAppState extends State<SkillTimerApp> {
+  @override
+  void initState() {
+    super.initState();
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ForegroundTimerService.init();
+      ForegroundTimerService.requestPermissions();
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     final routeObserver = CurrentRouteObserver();

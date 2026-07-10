@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:skill_timer/models/learning_session.dart';
 import 'package:skill_timer/models/skill.dart';
 import 'package:skill_timer/providers/skill_category_provider.dart';
+import 'package:skill_timer/providers/foreground_timer_service.dart';
 
 class TimerSessionProvider extends ChangeNotifier {
   static const Duration _refreshRate = Duration(milliseconds: 100);
@@ -22,6 +23,8 @@ class TimerSessionProvider extends ChangeNotifier {
   bool get hasUnsavedSession => _hasUnsavedSession;
   bool get canSave => _hasUnsavedSession && elapsedTime.inSeconds > 0;
 
+  int _lastNotificationSecond = -1;
+
   Future<void> start(Skill skill) async {
     if (_hasUnsavedSession && _currentSkill?.id == skill.id) {
       await resume();
@@ -35,20 +38,41 @@ class TimerSessionProvider extends ChangeNotifier {
     _hasUnsavedSession = true;
     _stopwatch.start();
     _startTicker();
+
+    await ForegroundTimerService.start(
+      skillName: skill.name,
+      elapsed: _elapsedTime,
+    );
+
     notifyListeners();
   }
 
   void _timerCallback() {
-    if (_stopwatch.isRunning) {
-      _elapsedTime = _stopwatch.elapsed;
-      notifyListeners();
+    if (!_stopwatch.isRunning) return;
+
+    _elapsedTime = _stopwatch.elapsed;
+
+    final currentSecond = _elapsedTime.inSeconds;
+    if (currentSecond != _lastNotificationSecond && _currentSkill != null) {
+      _lastNotificationSecond = currentSecond;
+      unawaited(
+        ForegroundTimerService.update(
+          skillName: _currentSkill!.name,
+          elapsed: _elapsedTime,
+        ),
+      );
     }
+
+    notifyListeners();
   }
 
   Future<void> pause() async {
     _elapsedTime = _stopwatch.elapsed;
     _stopwatch.stop();
     _currentTimer?.cancel();
+
+    await ForegroundTimerService.stop();
+
     notifyListeners();
   }
 
@@ -59,6 +83,12 @@ class TimerSessionProvider extends ChangeNotifier {
 
     _stopwatch.start();
     _startTicker();
+
+    await ForegroundTimerService.start(
+      skillName: _currentSkill!.name,
+      elapsed: _elapsedTime,
+    );
+
     notifyListeners();
   }
 
@@ -69,6 +99,10 @@ class TimerSessionProvider extends ChangeNotifier {
     _currentTimer?.cancel();
     _currentSkill = null;
     _hasUnsavedSession = false;
+    _lastNotificationSecond = -1;
+
+    await ForegroundTimerService.stop();
+
     notifyListeners();
   }
 

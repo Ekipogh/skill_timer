@@ -394,6 +394,13 @@ class TimeFormatter {
         '${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}'
         '.${(elapsed.inMilliseconds % 1000).toString().padLeft(3, '0')}';
   }
+
+  static String formatWithSeconds(Duration duration) {
+    final elapsed = duration;
+    return '${elapsed.inHours.toString().padLeft(2, '0')}:'
+        '${(elapsed.inMinutes % 60).toString().padLeft(2, '0')}:'
+        '${(elapsed.inSeconds % 60).toString().padLeft(2, '0')}';
+  }
 }
 
 class TimeString {
