@@ -187,7 +187,16 @@ class _SkillsScreenState extends State<SkillsScreen> {
       switch (result) {
         case SaveDiscardCancelResult.save:
           // Save the current session
-          await timerProvider.save(context.read<SkillProvider>());
+          final saveResult = await timerProvider.save(context.read<SkillProvider>());
+          if (saveResult != null) {
+            if (context.mounted) {
+              CustomSnackBar.showError(
+                context,
+                message: 'Failed to save session',
+              );
+            }
+            return;
+          }
           break;
         case SaveDiscardCancelResult.discard:
           // Discard the current session
