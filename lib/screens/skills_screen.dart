@@ -42,7 +42,7 @@ class _SkillsScreenState extends State<SkillsScreen> {
           Container(
             margin: const EdgeInsets.all(16),
             child: IconCard(
-              icon: Icons.category,
+              icon: getIcon(iconName: widget.category.iconPath),
               iconBackgroundColor: colorScheme.primaryContainer,
               iconColor: colorScheme.onPrimaryContainer,
               title: widget.category.name,

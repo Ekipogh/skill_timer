@@ -7,6 +7,7 @@ import 'package:skill_timer/providers/skill_category_provider.dart';
 import 'package:skill_timer/providers/time_session_provider.dart';
 import 'package:skill_timer/utils/constants.dart';
 import 'package:skill_timer/providers/foreground_timer_service.dart';
+import 'package:skill_timer/theme/app_theme.dart';
 
 class SkillTimerApp extends StatefulWidget {
   const SkillTimerApp({super.key});
@@ -37,7 +38,12 @@ class _SkillTimerAppState extends State<SkillTimerApp> {
       child: MaterialApp(
         navigatorObservers: [routeObserver],
         title: AppConstants.appName,
-        theme: ThemeData(primarySwatch: Colors.blue),
+        theme: AppTheme.light,
+        darkTheme: AppTheme.dark,
+        // Several legacy screens still use hard-coded light surfaces. Keep the
+        // app in light mode until those widgets have been audited for dark-mode
+        // contrast, rather than following the device theme inconsistently.
+        themeMode: ThemeMode.light,
         builder: (context, child) {
           return Stack(
             children: [

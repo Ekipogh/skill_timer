@@ -24,10 +24,10 @@ class CustomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final card = Card(
       margin: margin,
-      elevation: elevation ?? 4,
+      elevation: elevation ?? 0,
       color: color,
       shape: RoundedRectangleBorder(
-        borderRadius: borderRadius ?? BorderRadius.circular(16),
+        borderRadius: borderRadius ?? BorderRadius.circular(20),
       ),
       child: padding != null
           ? Padding(
@@ -40,7 +40,7 @@ class CustomCard extends StatelessWidget {
     if (onTap != null) {
       return InkWell(
         onTap: onTap,
-        borderRadius: borderRadius ?? BorderRadius.circular(16),
+        borderRadius: borderRadius ?? BorderRadius.circular(20),
         child: card,
       );
     }
@@ -62,7 +62,7 @@ class ElevatedCard extends CustomCard {
           child: child,
           margin: margin,
           padding: padding,
-          elevation: 8,
+          elevation: 1,
           borderRadius: borderRadius,
           color: color,
           onTap: onTap,
@@ -109,7 +109,7 @@ class IconCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: iconBackgroundColor ?? colorScheme.primaryContainer,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(14),
               ),
               child: Icon(
                 icon,

@@ -3,4 +3,4 @@ Heard of a 10000 hours rule? To become a master of a skill you should practice i
 
 Create or select a skill, like "Learning Japanesse", press a timer button and do some practice. When done, save the session to add to overall time.
 
-<img src="imgs/screen_rec.gif" widhth=428 height=768>
+![Screenshot](imgs/screenshot.jpg)

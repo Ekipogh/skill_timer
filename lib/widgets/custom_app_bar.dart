@@ -31,8 +31,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         title,
         style: const TextStyle(fontWeight: FontWeight.w600),
       ),
-      backgroundColor: backgroundColor ?? colorScheme.primary,
-      foregroundColor: foregroundColor ?? colorScheme.onPrimary,
+      backgroundColor: backgroundColor ?? Colors.transparent,
+      foregroundColor: foregroundColor ?? colorScheme.onSurface,
       elevation: elevation,
       centerTitle: centerTitle,
       actions: actions,
@@ -46,12 +46,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     return Container(
       margin: const EdgeInsets.all(8),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
+        color: colorScheme.primary.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Icon(
         Icons.timer_outlined,
-        color: colorScheme.onPrimaryContainer,
+        color: colorScheme.primary,
       ),
     );
   }
@@ -86,7 +86,7 @@ class CustomIconButton extends StatelessWidget {
       onPressed: onPressed,
       tooltip: tooltip,
       style: IconButton.styleFrom(
-        backgroundColor: backgroundColor ?? colorScheme.onPrimary.withValues(alpha: 0.1),
+        backgroundColor: backgroundColor ?? colorScheme.onSurface.withValues(alpha: 0.06),
         foregroundColor: foregroundColor,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
