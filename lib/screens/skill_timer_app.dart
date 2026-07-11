@@ -40,7 +40,10 @@ class _SkillTimerAppState extends State<SkillTimerApp> {
         title: AppConstants.appName,
         theme: AppTheme.light,
         darkTheme: AppTheme.dark,
-        themeMode: ThemeMode.system,
+        // Several legacy screens still use hard-coded light surfaces. Keep the
+        // app in light mode until those widgets have been audited for dark-mode
+        // contrast, rather than following the device theme inconsistently.
+        themeMode: ThemeMode.light,
         builder: (context, child) {
           return Stack(
             children: [
