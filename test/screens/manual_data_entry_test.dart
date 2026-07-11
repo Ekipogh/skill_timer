@@ -449,7 +449,6 @@ void main() {
       testWidgets('should navigate back after successful save', (
         WidgetTester tester,
       ) async {
-
         // Test Widget with button that opens manual entry screen
         Widget testWidget = MaterialApp(
           home: Scaffold(
@@ -460,6 +459,7 @@ void main() {
                   Navigator.push(
                     tester.element(find.byType(Center)),
                     MaterialPageRoute(
+                      settings: const RouteSettings(name: '/manual_data_entry'),
                       builder: (context) =>
                           ManualDataEntryScreen(skill: testSkill),
                     ),

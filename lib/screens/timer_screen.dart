@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/models/skill.dart';
+import 'package:skill_timer/providers/time_session_provider.dart';
 import 'package:skill_timer/screens/manual_data.dart';
 import 'package:wakelock_plus/wakelock_plus.dart';
 import '../providers/skill_category_provider.dart';
@@ -18,18 +19,6 @@ class TimerScreen extends StatefulWidget {
 }
 
 class _TimerScreenState extends State<TimerScreen> {
-  late final Stopwatch _stopwatch = Stopwatch();
-  Timer? _timer;
-  final int _refreshRate = 100; // Update every 100 milliseconds
-  String _elapsedTime = '00:00:00.000';
-  bool _sessionSaved = true;
-  int _targetTime = 0; // Initialize target time to 0
-
-  @override
-  void initState() {
-    super.initState();
-  }
-
   Future<void> _setWakelockEnabled(bool enabled) async {
     try {
       await WakelockPlus.toggle(enable: enabled);
@@ -38,46 +27,95 @@ class _TimerScreenState extends State<TimerScreen> {
     }
   }
 
-  void _startTimer() {
-    if (_stopwatch.isRunning) {
+  Future<void> _startTimer() async {
+    final timerProvider = context.read<TimerSessionProvider>();
+    if (timerProvider.isRunning) {
       return;
     }
 
-    _timer?.cancel();
-    _timer = Timer.periodic(
-      Duration(milliseconds: _refreshRate),
-      _timerCallback,
-    );
-    _stopwatch.start();
+    unawaited(timerProvider.start(widget.skill));
     unawaited(_setWakelockEnabled(true));
-    _setElapsedTime(sessionSaved: false);
   }
 
   void _stopTimer() {
-    _timer?.cancel();
-    _timer = null;
-    _stopwatch.stop();
-    unawaited(_setWakelockEnabled(false));
-    _setElapsedTime();
-  }
-
-  void _setElapsedTime({bool? sessionSaved}) {
-    if (!mounted) {
+    final timerProvider = context.read<TimerSessionProvider>();
+    if (!timerProvider.isRunning) {
       return;
     }
 
-    final elapsed = _stopwatch.elapsed;
-    setState(() {
-      _elapsedTime = TimeFormatter.formatWithMilliseconds(elapsed);
-      if (sessionSaved != null) {
-        _sessionSaved = sessionSaved;
-      }
-    });
+    unawaited(timerProvider.pause());
+    unawaited(_setWakelockEnabled(false));
   }
 
-  void _timerCallback(Timer timer) {
-    if (_stopwatch.isRunning) {
-      _setElapsedTime();
+  Future<bool> _saveSession(TimerSessionProvider timerProvider) async {
+    if (!timerProvider.canSave) {
+      return false;
+    }
+
+    if (timerProvider.isRunning) {
+      _stopTimer();
+    }
+
+    final skillProvider = context.read<SkillProvider>();
+
+    try {
+      await timerProvider.save(skillProvider);
+
+      if (context.mounted) {
+        CustomSnackBar.showSuccess(
+          context,
+          message: 'Session saved successfully!',
+        );
+      }
+      return true;
+    } catch (e) {
+      if (context.mounted) {
+        CustomSnackBar.showError(
+          context,
+          message: 'Failed to save session: $e',
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<void> _handleExit(TimerSessionProvider timerProvider) async {
+    if (timerProvider.isRunning || !timerProvider.hasUnsavedSession) {
+      unawaited(_setWakelockEnabled(false));
+      if (context.mounted) {
+        Navigator.pop(context);
+      }
+      return;
+    }
+
+    final result = await SaveDiscardCancelDialog.show(
+      context,
+      skillName: widget.skill.name,
+      elapsedTime: TimeFormatter.formatWithMilliseconds(
+        timerProvider.elapsedTime,
+      ),
+    );
+    if (!context.mounted) {
+      return;
+    }
+
+    switch (result) {
+      case SaveDiscardCancelResult.save:
+        final saved = await _saveSession(timerProvider);
+        if (context.mounted && saved) {
+          Navigator.pop(context, true);
+        }
+        return;
+      case SaveDiscardCancelResult.discard:
+        await timerProvider.discard();
+        unawaited(_setWakelockEnabled(false));
+        if (context.mounted) {
+          Navigator.pop(context);
+        }
+        return;
+      case SaveDiscardCancelResult.cancel:
+      case null:
+        return;
     }
   }
 
@@ -97,6 +135,7 @@ class _TimerScreenState extends State<TimerScreen> {
             onPressed: () {
               Navigator.of(context).push(
                 MaterialPageRoute(
+                  settings: const RouteSettings(name: '/manual_data_entry'),
                   builder: (context) =>
                       ManualDataEntryScreen(skill: widget.skill),
                 ),
@@ -105,121 +144,112 @@ class _TimerScreenState extends State<TimerScreen> {
           ),
         ],
       ),
-      body: PopScope(
-        canPop: false,
-        onPopInvokedWithResult: (didPop, result) async {
-          if (didPop) {
-            return;
-          }
-          final bool isRunningOrNotSaved =
-              _stopwatch.isRunning || !_sessionSaved;
-          if (isRunningOrNotSaved) {
-            final bool shouldPop = await UnsavedChangesDialog.show(
-              context,
-              isTimerRunning: _stopwatch.isRunning,
-            );
-            if (context.mounted && shouldPop) {
-              Navigator.pop(context);
-            }
-          } else {
-            Navigator.pop(context);
-          }
-        },
-        child: TimerGradientBackground(
-          child: SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(24.0),
-              child: Column(
-                children: [
-                  // Skill info card
-                  IconCard(
-                    icon: Icons.psychology,
-                    iconColor: colorScheme.primary,
-                    iconBackgroundColor: colorScheme.primary.withValues(
-                      alpha: 0.1,
-                    ),
-                    title: widget.skill.name,
-                    subtitle: widget.skill.description.isNotEmpty
-                        ? widget.skill.description
-                        : null,
-                    padding: const EdgeInsets.all(20),
-                  ),
-
-                  const Spacer(),
-
-                  // Timer display
-                  TimerDisplay(
-                    elapsedTime: _elapsedTime,
-                    isRunning: _stopwatch.isRunning,
-                    targetTime: _targetTime > 0 ? _targetTime : null,
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  // Target time card
-                  TargetTimeCard(
-                    selectedTargetTime: _targetTime > 0 ? _targetTime : null,
-                    onTargetTimeSelected: (selectedTime) {
-                      // Handle target time selection
-                      setState(() {
-                        _targetTime = selectedTime;
-                      });
-                    },
-                  ),
-
-                  const SizedBox(height: 40),
-
-                  // Control button
-                  _stopwatch.isRunning
-                      ? PauseButton(
-                          onPressed: () {
-                            _stopTimer();
-                          },
-                        )
-                      : StartButton(
-                          onPressed: () {
-                            _startTimer();
-                          },
+      body: Consumer<TimerSessionProvider>(
+        builder: (context, timerProvider, child) {
+          return PopScope(
+            canPop: false,
+            onPopInvokedWithResult: (didPop, result) async {
+              if (didPop) {
+                return;
+              }
+              await _handleExit(timerProvider);
+            },
+            child: TimerGradientBackground(
+              child: SafeArea(
+                child: Padding(
+                  padding: const EdgeInsets.all(24.0),
+                  child: Column(
+                    children: [
+                      // Skill info card
+                      IconCard(
+                        icon: Icons.psychology,
+                        iconColor: colorScheme.primary,
+                        iconBackgroundColor: colorScheme.primary.withValues(
+                          alpha: 0.1,
                         ),
-
-                  const Spacer(),
-
-                  // Stats row
-                  StatsCard(
-                    stats: [
-                      StatItem(
-                        icon: Icons.timer,
-                        label: 'Total Time',
-                        value: TimeFormatter.format(
-                          widget.skill.totalTimeSpent,
-                        ),
+                        title: widget.skill.name,
+                        subtitle: widget.skill.description.isNotEmpty
+                            ? widget.skill.description
+                            : null,
+                        padding: const EdgeInsets.all(20),
                       ),
-                      StatItem(
-                        icon: Icons.analytics,
-                        label: 'Sessions',
-                        value: '${widget.skill.sessionsCount}',
+
+                      const Spacer(),
+
+                      // Timer display
+                      TimerDisplay(
+                        elapsedTime: timerProvider.elapsedTime,
+                        isRunning: timerProvider.isRunning,
+                        targetTime: timerProvider.targetTime.inSeconds > 0
+                            ? timerProvider.targetTime
+                            : null,
+                      ),
+
+                      const SizedBox(height: 10),
+
+                      // Target time card
+                      TargetTimeCard(
+                        selectedTargetTime: timerProvider.targetTime.inMinutes,
+                        onTargetTimeSelected: (selectedTime) {
+                          timerProvider.setTargetTime(
+                            Duration(minutes: selectedTime),
+                          );
+                        },
+                      ),
+
+                      const SizedBox(height: 40),
+
+                      // Control button
+                      timerProvider.isRunning
+                          ? PauseButton(
+                              onPressed: () {
+                                _stopTimer();
+                              },
+                            )
+                          : StartButton(
+                              onPressed: () async {
+                                await _startTimer();
+                              },
+                            ),
+
+                      const Spacer(),
+
+                      // Stats row
+                      StatsCard(
+                        stats: [
+                          StatItem(
+                            icon: Icons.timer,
+                            label: 'Total Time',
+                            value: TimeFormatter.format(
+                              widget.skill.totalTimeSpent,
+                            ),
+                          ),
+                          StatItem(
+                            icon: Icons.analytics,
+                            label: 'Sessions',
+                            value: '${widget.skill.sessionsCount}',
+                          ),
+                        ],
                       ),
                     ],
                   ),
-                ],
+                ),
               ),
             ),
-          ),
-        ),
+          );
+        },
       ),
-      floatingActionButton: _sessionSaved
+      floatingActionButton: !context.watch<TimerSessionProvider>().canSave
           ? null
           : SaveButton(
               onPressed: () async {
-                if (!_stopwatch.isRunning &&
-                    _stopwatch.elapsed.inSeconds == 0) {
-                  return; // Do nothing if no time has elapsed
-                }
-
+                final timerProvider = context.read<TimerSessionProvider>();
                 final bool shouldSave = await SaveSessionDialog.show(
                   context,
                   skillName: widget.skill.name,
-                  elapsedTime: _elapsedTime,
+                  elapsedTime: TimeFormatter.formatWithMilliseconds(
+                    timerProvider.elapsedTime,
+                  ),
                 );
                 if (!shouldSave) {
                   return;
@@ -229,40 +259,9 @@ class _TimerScreenState extends State<TimerScreen> {
                   return;
                 }
 
-                if (_stopwatch.isRunning) {
-                  _stopTimer();
-                }
-
-                if (!_sessionSaved) {
-                  final skillProvider = context.read<SkillProvider>();
-
-                  try {
-                    // create a new session record
-                    final session = {
-                      'id': DateTime.now().millisecondsSinceEpoch.toString(),
-                      'skillId': widget.skill.id,
-                      'duration': _stopwatch.elapsed.inSeconds,
-                      'datePerformed': DateTime.now().toIso8601String(),
-                    };
-
-                    await skillProvider.addSession(session);
-                    _sessionSaved = true;
-
-                    if (context.mounted) {
-                      CustomSnackBar.showSuccess(
-                        context,
-                        message: 'Session saved successfully!',
-                      );
-                      Navigator.pop(context, true);
-                    }
-                  } catch (e) {
-                    if (context.mounted) {
-                      CustomSnackBar.showError(
-                        context,
-                        message: 'Failed to save session: $e',
-                      );
-                    }
-                  }
+                final saved = await _saveSession(timerProvider);
+                if (context.mounted && saved) {
+                  Navigator.pop(context, true);
                 }
               },
             ),
@@ -271,8 +270,6 @@ class _TimerScreenState extends State<TimerScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel();
-    _stopwatch.stop();
     unawaited(_setWakelockEnabled(false));
     super.dispose();
   }

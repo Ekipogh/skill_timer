@@ -76,6 +76,7 @@ class CustomIconField extends StatelessWidget {
         final selectedIconPath = await Navigator.push<String>(
           context,
           MaterialPageRoute(
+            settings: const RouteSettings(name: '/icon_selector'),
             builder: (context) => IconSelector(selectedIconPath: iconPath),
           ),
         );
