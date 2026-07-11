@@ -26,8 +26,12 @@ class GradientBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: begin,
           end: end,
-          colors: colors ?? [colorScheme.primary, colorScheme.surface],
-          stops: stops ?? const [0.0, 0.3],
+          colors: colors ?? [
+            colorScheme.primaryContainer.withValues(alpha: 0.72),
+            colorScheme.surface,
+            colorScheme.surface,
+          ],
+          stops: stops ?? const [0.0, 0.34, 1.0],
         ),
       ),
       child: child,
@@ -80,7 +84,7 @@ class TimerGradientBackground extends GradientBackground {
     : super(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        stops: const [0.0, 0.3],
+        stops: const [0.0, 0.34, 1.0],
       );
 }
 
@@ -89,7 +93,7 @@ class SkillsGradientBackground extends GradientBackground {
     : super(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        stops: const [0.0, 0.2],
+        stops: const [0.0, 0.28, 1.0],
       );
 }
 
@@ -98,7 +102,7 @@ class HomeGradientBackground extends GradientBackground {
     : super(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        stops: const [0.0, 0.2],
+        stops: const [0.0, 0.28, 1.0],
       );
 }
 
@@ -107,7 +111,7 @@ class SessionReportGradientBackground extends GradientBackground {
     : super(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        stops: const [0.0, 0.2],
+        stops: const [0.0, 0.28, 1.0],
       );
 }
 
@@ -116,6 +120,6 @@ class GeneralGradientBackground extends GradientBackground {
     : super(
         begin: Alignment.topCenter,
         end: Alignment.bottomCenter,
-        stops: const [0.0, 0.2],
+        stops: const [0.0, 0.28, 1.0],
       );
 }

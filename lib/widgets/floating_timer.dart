@@ -23,22 +23,30 @@ class _FloatingTimerState extends State<FloatingTimer> {
         }
 
         return Positioned(
-          bottom: 16,
-          left: 16,
+          bottom: 20,
+          left: 20,
           child: Card(
-            color: Colors.blueAccent.withAlpha(200),
+            color: Theme.of(context).colorScheme.primary,
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
                     timer.currentSkill?.name ?? "No Skill",
-                    style: const TextStyle(fontSize: 18.0, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Theme.of(context).colorScheme.onPrimary,
+                    ),
                   ),
                   Text(
                     TimeFormatter.formatWithMilliseconds(timer.elapsedTime),
-                    style: const TextStyle(fontSize: 24.0, color: Colors.white),
+                    style: TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w700,
+                      color: Theme.of(context).colorScheme.tertiary,
+                    ),
                   ),
                 ],
               ),

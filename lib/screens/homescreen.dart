@@ -149,10 +149,13 @@ class _HomeScreenState extends State<HomeScreen> {
           return RefreshIndicator(
             onRefresh: () => provider.refresh(),
             child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: provider.skillCategories.length,
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 104),
+              itemCount: provider.skillCategories.length + 1,
               itemBuilder: (context, index) {
-                final skillCategory = provider.skillCategories[index];
+                if (index == 0) {
+                  return _buildFocusOverview(provider);
+                }
+                final skillCategory = provider.skillCategories[index - 1];
                 return _buildEnhancedSkillCategoryTile(skillCategory);
               },
             ),
@@ -168,6 +171,79 @@ class _HomeScreenState extends State<HomeScreen> {
         foregroundColor: Theme.of(context).colorScheme.onPrimary,
       ),
       endDrawer: const AppDrawer(),
+    );
+  }
+
+  Widget _buildFocusOverview(SkillProvider provider) {
+    final theme = Theme.of(context);
+    final colors = theme.colorScheme;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Make time for mastery.',
+            style: theme.textTheme.headlineMedium,
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Choose a practice area and settle into a focused session.',
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colors.onSurface.withValues(alpha: 0.68),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: colors.primary,
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: colors.onPrimary.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                  child: Icon(
+                    Icons.auto_graph_rounded,
+                    color: colors.tertiary,
+                    size: 28,
+                  ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '${provider.skills.length} skills ready',
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          color: colors.onPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 3),
+                      Text(
+                        'Small sessions build lasting progress.',
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colors.onPrimary.withValues(alpha: 0.74),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Text('Practice areas', style: theme.textTheme.titleLarge),
+        ],
+      ),
     );
   }
 

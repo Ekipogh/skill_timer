@@ -77,6 +77,11 @@ class ActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+    final resolvedBackgroundColor = backgroundColor ?? colorScheme.primary;
+    final resolvedForegroundColor =
+        foregroundColor ?? colorScheme.onPrimary;
+
     if (isCircular) {
       return SizedBox(
         width: size ?? 160,
@@ -84,11 +89,11 @@ class ActionButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: onPressed,
           style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor,
-            foregroundColor: foregroundColor ?? Colors.white,
+            backgroundColor: resolvedBackgroundColor,
+            foregroundColor: resolvedForegroundColor,
             shape: const CircleBorder(),
             elevation: 8,
-            shadowColor: backgroundColor?.withValues(alpha: 0.3),
+            shadowColor: resolvedBackgroundColor.withValues(alpha: 0.3),
           ),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -113,8 +118,8 @@ class ActionButton extends StatelessWidget {
       icon: Icon(icon),
       label: Text(label),
       style: ElevatedButton.styleFrom(
-        backgroundColor: backgroundColor,
-        foregroundColor: foregroundColor ?? Colors.white,
+        backgroundColor: resolvedBackgroundColor,
+        foregroundColor: resolvedForegroundColor,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
     );
@@ -122,34 +127,30 @@ class ActionButton extends StatelessWidget {
 }
 
 class StartButton extends ActionButton {
-  const StartButton({required VoidCallback onPressed, super.key})
+  const StartButton({required super.onPressed, super.key})
     : super(
         icon: Icons.play_arrow,
-        label: 'Start',
-        onPressed: onPressed,
-        backgroundColor: Colors.green,
+        label: 'Begin focus',
         isCircular: true,
       );
 }
 
 class PauseButton extends ActionButton {
-  const PauseButton({required VoidCallback onPressed, super.key})
+  const PauseButton({required super.onPressed, super.key})
     : super(
         icon: Icons.pause,
         label: 'Pause',
-        onPressed: onPressed,
-        backgroundColor: Colors.red,
+        backgroundColor: const Color(0xFFBA1A1A),
+        foregroundColor: Colors.white,
         isCircular: true,
       );
 }
 
 class SaveButton extends ActionButton {
-  const SaveButton({required VoidCallback onPressed, super.key})
+  const SaveButton({required super.onPressed, super.key})
     : super(
         icon: Icons.save,
         label: 'Save Session',
-        onPressed: onPressed,
-        backgroundColor: Colors.blue,
       );
 }
 
@@ -238,13 +239,16 @@ class TimerDisplay extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(32),
       decoration: BoxDecoration(
-        color: colorScheme.primaryContainer,
+        color: colorScheme.surface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: colorScheme.outlineVariant.withValues(alpha: 0.8),
+        ),
         boxShadow: [
           BoxShadow(
-            color: colorScheme.shadow.withValues(alpha: 0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            color: colorScheme.primary.withValues(alpha: 0.08),
+            blurRadius: 28,
+            offset: const Offset(0, 14),
           ),
         ],
       ),
@@ -253,7 +257,7 @@ class TimerDisplay extends StatelessWidget {
           Text(
             'Session Time',
             style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+              color: colorScheme.onSurface.withValues(alpha: 0.62),
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -261,9 +265,10 @@ class TimerDisplay extends StatelessWidget {
           AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 300),
             style: TextStyle(
-              fontSize: isRunning ? 56 : 48,
-              fontWeight: FontWeight.bold,
-              color: colorScheme.onPrimaryContainer,
+              fontSize: isRunning ? 56 : 52,
+              fontWeight: FontWeight.w700,
+              letterSpacing: -1.8,
+              color: colorScheme.onSurface,
             ),
             child: Text(TimeFormatter.formatWithMilliseconds(elapsedTime)),
           ),
@@ -273,8 +278,8 @@ class TimerDisplay extends StatelessWidget {
               TimeString.format(targetTime!.inSeconds),
               style: theme.textTheme.bodyMedium?.copyWith(
                 color: _targetMet
-                    ? Colors.green
-                    : colorScheme.onPrimaryContainer.withValues(alpha: 0.7),
+                    ? colorScheme.secondary
+                    : colorScheme.onSurface.withValues(alpha: 0.62),
                 fontWeight: FontWeight.w500,
               ),
             ),
@@ -288,16 +293,16 @@ class TimerDisplay extends StatelessWidget {
                 height: 12,
                 decoration: BoxDecoration(
                   color: _targetMet
-                      ? Colors.green
-                      : (isRunning ? Colors.green : Colors.grey),
+                      ? colorScheme.tertiary
+                      : (isRunning ? colorScheme.secondary : colorScheme.outline),
                   shape: BoxShape.circle,
                 ),
               ),
               const SizedBox(width: 8),
               Text(
-                isRunning ? 'Running' : 'Stopped',
+                isRunning ? 'Focus in progress' : 'Ready when you are',
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                  color: colorScheme.onSurface.withValues(alpha: 0.62),
                   fontWeight: FontWeight.w500,
                 ),
               ),

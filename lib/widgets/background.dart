@@ -9,7 +9,9 @@
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isLeft ? Colors.blue : Colors.red,
+          color: isLeft
+              ? Theme.of(context).colorScheme.secondary
+              : Theme.of(context).colorScheme.error,
           borderRadius: BorderRadius.circular(12),
         ),
         alignment: isLeft ? Alignment.centerLeft : Alignment.centerRight,
