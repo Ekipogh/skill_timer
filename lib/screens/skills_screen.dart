@@ -181,14 +181,14 @@ class _SkillsScreenState extends State<SkillsScreen> {
         context,
         skillName: timerProvider.currentSkill!.name,
         elapsedTime: Formatters.formatDurationFromSeconds(
-          timerProvider.currentSkill!.totalTimeSpent,
+          timerProvider.elapsedTime.inSeconds,
         ),
       );
       switch (result) {
         case SaveDiscardCancelResult.save:
           // Save the current session
           final saveResult = await timerProvider.save(context.read<SkillProvider>());
-          if (saveResult != null) {
+          if (saveResult == null) {
             if (context.mounted) {
               CustomSnackBar.showError(
                 context,
