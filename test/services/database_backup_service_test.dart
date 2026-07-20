@@ -13,7 +13,8 @@ void main() {
           'formatVersion': formatVersion,
           'databaseVersion': 2,
           'exportedAt': '2026-07-20T12:00:00.000Z',
-          'data': data ??
+          'data':
+              data ??
               {
                 'skillCategories': [
                   {
@@ -61,7 +62,7 @@ void main() {
     );
   });
 
-  test('rejects sessions whose skill is missing', () {
+  test('accepts historical sessions whose skill has been deleted', () {
     final bytes = backupBytes(
       data: {
         'skillCategories': <Map<String, Object?>>[],
@@ -77,16 +78,12 @@ void main() {
       },
     );
 
-    expect(
-      () => DatabaseBackupService.decodeAndValidate(bytes),
-      throwsA(
-        isA<DatabaseBackupException>().having(
-          (error) => error.message,
-          'message',
-          contains('missing skill'),
-        ),
-      ),
-    );
+    final backup = DatabaseBackupService.decodeAndValidate(bytes);
+    final data = backup['data'] as Map<String, dynamic>;
+    final sessions = data['timerSessions'] as List<dynamic>;
+
+    expect(sessions, hasLength(1));
+    expect((sessions.single as Map<String, dynamic>)['skillId'], 'missing');
   });
 
   test('rejects invalid JSON', () {

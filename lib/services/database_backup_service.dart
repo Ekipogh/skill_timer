@@ -113,15 +113,9 @@ class DatabaseBackupService {
     );
 
     final categoryIds = categories.map((row) => row['id']).toSet();
-    final skillIds = skills.map((row) => row['id']).toSet();
     if (skills.any((row) => !categoryIds.contains(row['category']))) {
       throw const DatabaseBackupException(
         'The backup contains a skill with a missing category.',
-      );
-    }
-    if (sessions.any((row) => !skillIds.contains(row['skillId']))) {
-      throw const DatabaseBackupException(
-        'The backup contains a session with a missing skill.',
       );
     }
     for (final session in sessions) {
@@ -165,7 +159,10 @@ class DatabaseBackupService {
     return rows;
   }
 
-  static List<Map<String, Object?>> _rows(Map<String, dynamic> data, String key) {
+  static List<Map<String, Object?>> _rows(
+    Map<String, dynamic> data,
+    String key,
+  ) {
     return (data[key] as List)
         .cast<Map<String, dynamic>>()
         .map(Map<String, Object?>.from)
