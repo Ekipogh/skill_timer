@@ -387,6 +387,7 @@ class AppDrawer extends StatelessWidget {
           files: [
             XFile.fromData(bytes, mimeType: 'application/json', name: fileName),
           ],
+          fileNameOverrides: [fileName],
           subject: 'Skill Timer backup',
           sharePositionOrigin: shareOrigin,
         ),
