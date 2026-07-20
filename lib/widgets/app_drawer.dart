@@ -1,14 +1,23 @@
+import 'package:file_selector/file_selector.dart' show XTypeGroup, openFile;
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:skill_timer/screens/analytics.dart';
 import 'package:skill_timer/screens/session_report.dart';
 import '../providers/skill_category_provider.dart';
+import '../services/database_backup_service.dart';
 import '../widgets/dev_database_utils.dart';
 import '../widgets/widgets.dart';
 
 class AppDrawer extends StatelessWidget {
   const AppDrawer({super.key});
+
+  static const _backupFileType = XTypeGroup(
+    label: 'Skill Timer backup',
+    extensions: ['json'],
+    mimeTypes: ['application/json'],
+  );
 
   @override
   Widget build(BuildContext context) {
@@ -197,7 +206,6 @@ class AppDrawer extends StatelessWidget {
           title: 'Export Data',
           subtitle: 'Backup your progress',
           onTap: () => _exportData(context),
-          enabled: false, // Not implemented yet
         ),
         _buildDrawerTile(
           context,
@@ -205,7 +213,6 @@ class AppDrawer extends StatelessWidget {
           title: 'Import Data',
           subtitle: 'Restore from backup',
           onTap: () => _importData(context),
-          enabled: false, // Not implemented yet
         ),
         _buildDrawerTile(
           context,
@@ -340,8 +347,10 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(settings: const RouteSettings(name: '/sessions_report'),
-      builder: (context) => const SessionReport()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/sessions_report'),
+        builder: (context) => const SessionReport(),
+      ),
     );
   }
 
@@ -349,8 +358,10 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(settings: const RouteSettings(name: '/analytics'),
-      builder: (context) => const AnalyticsScreen()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/analytics'),
+        builder: (context) => const AnalyticsScreen(),
+      ),
     );
   }
 
@@ -359,14 +370,88 @@ class AppDrawer extends StatelessWidget {
     // TODO: Implement achievements screen
   }
 
-  void _exportData(BuildContext context) {
+  Future<void> _exportData(BuildContext context) async {
+    final box = context.findRenderObject() as RenderBox?;
+    final shareOrigin = box == null
+        ? null
+        : box.localToGlobal(Offset.zero) & box.size;
     Navigator.pop(context); // Close drawer
-    // TODO: Implement data export
+    try {
+      final bytes = await DatabaseBackupService().exportBackup();
+      final now = DateTime.now();
+      final date =
+          '${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}';
+      final fileName = 'skill_timer_backup_$date.json';
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [
+            XFile.fromData(bytes, mimeType: 'application/json', name: fileName),
+          ],
+          subject: 'Skill Timer backup',
+          sharePositionOrigin: shareOrigin,
+        ),
+      );
+    } catch (error) {
+      if (context.mounted) {
+        CustomSnackBar.showError(
+          context,
+          message: 'Could not export data: $error',
+        );
+      }
+    }
   }
 
-  void _importData(BuildContext context) {
+  Future<void> _importData(BuildContext context) async {
     Navigator.pop(context); // Close drawer
-    // TODO: Implement data import
+    try {
+      final file = await openFile(
+        acceptedTypeGroups: const [_backupFileType],
+        confirmButtonText: 'Import',
+      );
+      if (file == null || !context.mounted) return;
+
+      final bytes = await file.readAsBytes();
+      DatabaseBackupService.decodeAndValidate(bytes);
+      if (!context.mounted) return;
+
+      final confirmed = await showDialog<bool>(
+        context: context,
+        builder: (dialogContext) => AlertDialog(
+          title: const Text('Replace all data?'),
+          content: const Text(
+            'Importing this backup will replace every current category, skill, and session. This cannot be undone.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: const Text('Cancel'),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.pop(dialogContext, true),
+              child: const Text('Import'),
+            ),
+          ],
+        ),
+      );
+      if (confirmed != true || !context.mounted) return;
+
+      await DatabaseBackupService().importBackup(bytes);
+      if (!context.mounted) return;
+      await context.read<SkillProvider>().refresh();
+      if (context.mounted) {
+        CustomSnackBar.showSuccess(
+          context,
+          message: 'Backup imported successfully',
+        );
+      }
+    } catch (error) {
+      if (context.mounted) {
+        CustomSnackBar.showError(
+          context,
+          message: 'Could not import data: $error',
+        );
+      }
+    }
   }
 
   void _navigateToSettings(BuildContext context) {
@@ -378,8 +463,10 @@ class AppDrawer extends StatelessWidget {
     Navigator.pop(context); // Close drawer
     Navigator.push(
       context,
-      MaterialPageRoute(settings: const RouteSettings(name: '/debug'),
-      builder: (context) => const DevDatabaseUtils()),
+      MaterialPageRoute(
+        settings: const RouteSettings(name: '/debug'),
+        builder: (context) => const DevDatabaseUtils(),
+      ),
     );
   }
 
