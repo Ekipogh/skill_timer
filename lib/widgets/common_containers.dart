@@ -82,45 +82,36 @@ class InfoContainer extends StatelessWidget {
 
 class WarningContainer extends InfoContainer {
   const WarningContainer({
-    required String text,
-    EdgeInsetsGeometry? padding,
-    BorderRadius? borderRadius,
+    required super.text,
+    super.padding,
+    super.borderRadius,
     super.key,
   }) : super(
           icon: Icons.warning,
-          text: text,
           color: Colors.red,
-          padding: padding,
-          borderRadius: borderRadius,
         );
 }
 
 class TipContainer extends InfoContainer {
   const TipContainer({
-    required String text,
-    EdgeInsetsGeometry? padding,
-    BorderRadius? borderRadius,
+    required super.text,
+    super.padding,
+    super.borderRadius,
     super.key,
   }) : super(
           icon: Icons.lightbulb,
-          text: text,
           color: Colors.blue,
-          padding: padding,
-          borderRadius: borderRadius,
         );
 }
 
 class SuccessContainer extends InfoContainer {
   const SuccessContainer({
-    required String text,
-    EdgeInsetsGeometry? padding,
-    BorderRadius? borderRadius,
+    required super.text,
+    super.padding,
+    super.borderRadius,
     super.key,
   }) : super(
           icon: Icons.check_circle,
-          text: text,
           color: Colors.green,
-          padding: padding,
-          borderRadius: borderRadius,
         );
 }
