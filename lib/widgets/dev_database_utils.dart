@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skill_timer/services/local_notification_service.dart';
 import '../services/database.dart';
 import '../utils/constants.dart';
 
@@ -83,6 +84,20 @@ class DevDatabaseUtils extends StatelessWidget {
                 label: const Text('Show Schema Info'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.green,
+                  foregroundColor: Colors.white,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            //  test sound notification button
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton.icon(
+                onPressed: () => LocalNotificationService.showNotification("Test", "Test notification"),
+                icon: const Icon(Icons.notifications),
+                label: const Text('Test Notification'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple,
                   foregroundColor: Colors.white,
                 ),
               ),
