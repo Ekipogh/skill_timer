@@ -72,11 +72,11 @@ class TimerSessionProvider extends ChangeNotifier {
         !_isTargetNotificationSent) {
       final reachedTarget = _targetTime;
       _isTargetNotificationSent = true;
-      LocalNotificationService.showNotification(
+      unawaited(LocalNotificationService.showNotification(
         'Target Time Reached',
         'You have reached your target time of ${reachedTarget.inMinutes} minutes for ${_currentSkill!.name}.',
-      );
-      _resetTargetTime();
+      ));
+      _isTargetNotificationSent = true;
     }
 
     notifyListeners();
