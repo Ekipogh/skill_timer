@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skill_timer/providers/current_route_observer.dart';
 import 'package:skill_timer/screens/homescreen.dart';
+import 'package:skill_timer/services/local_notification_service.dart';
 import 'package:skill_timer/widgets/floating_timer.dart';
 import 'package:skill_timer/providers/skill_category_provider.dart';
 import 'package:skill_timer/providers/time_session_provider.dart';
@@ -23,6 +24,8 @@ class _SkillTimerAppState extends State<SkillTimerApp> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ForegroundTimerService.init();
       ForegroundTimerService.requestPermissions();
+
+      LocalNotificationService.init();
     });
   }
 
