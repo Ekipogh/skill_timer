@@ -39,7 +39,7 @@ class TimerSessionProvider extends ChangeNotifier {
     _stopwatch.reset();
     _elapsedTime = Duration.zero;
     _hasUnsavedSession = true;
-    _isTargetNotificationSent = false;
+    _resetTargetTime();
     _stopwatch.start();
     _startTicker();
 
@@ -71,12 +71,11 @@ class TimerSessionProvider extends ChangeNotifier {
         _elapsedTime >= _targetTime &&
         !_isTargetNotificationSent) {
       final reachedTarget = _targetTime;
-      _isTargetNotificationSent = true;
+      _resetTargetTime();
       unawaited(LocalNotificationService.showNotification(
         'Target Time Reached',
         'You have reached your target time of ${reachedTarget.inMinutes} minutes for ${_currentSkill!.name}.',
       ));
-      _isTargetNotificationSent = true;
     }
 
     notifyListeners();
