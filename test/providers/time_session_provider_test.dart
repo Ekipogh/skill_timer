@@ -52,7 +52,7 @@ void main() {
       await provider.pause();
     });
 
-    testWidgets('clears the target when it is reached', (tester) async {
+    testWidgets('preserves the target when it is reached', (tester) async {
       final provider = TimerSessionProvider();
       addTearDown(provider.dispose);
 
@@ -60,11 +60,11 @@ void main() {
       await provider.setTargetTime(const Duration(milliseconds: 20));
       await advanceStopwatch(tester, const Duration(milliseconds: 30));
 
-      expect(provider.targetTime, Duration.zero);
+      expect(provider.targetTime, const Duration(milliseconds: 20));
       await provider.pause();
     });
 
-    testWidgets('clears the target when switching to another skill', (
+    testWidgets('preserves the target when switching to another skill', (
       tester,
     ) async {
       final provider = TimerSessionProvider();
@@ -75,7 +75,7 @@ void main() {
       await provider.start(secondSkill);
 
       expect(provider.currentSkill, secondSkill);
-      expect(provider.targetTime, Duration.zero);
+      expect(provider.targetTime, target);
       await provider.pause();
     });
 
@@ -113,7 +113,7 @@ void main() {
       expect(provider.targetTime, Duration.zero);
     });
 
-    testWidgets('a new target can be reached in the same session', (
+    testWidgets('a reached target can be replaced in the same session', (
       tester,
     ) async {
       final provider = TimerSessionProvider();
@@ -122,12 +122,12 @@ void main() {
       await provider.start(firstSkill);
       await provider.setTargetTime(const Duration(milliseconds: 20));
       await advanceStopwatch(tester, const Duration(milliseconds: 30));
-      expect(provider.targetTime, Duration.zero);
+      expect(provider.targetTime, const Duration(milliseconds: 20));
 
       await provider.setTargetTime(const Duration(milliseconds: 60));
       await advanceStopwatch(tester, const Duration(milliseconds: 40));
 
-      expect(provider.targetTime, Duration.zero);
+      expect(provider.targetTime, const Duration(milliseconds: 60));
       await provider.pause();
     });
   });
