@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:skill_timer/models/learning_session.dart';
 import 'package:skill_timer/models/skill.dart';
 import 'package:skill_timer/providers/skill_category_provider.dart';
-import 'package:skill_timer/providers/foreground_timer_service.dart';
+import 'package:skill_timer/services/foreground_timer_service.dart';
 
 class TimerSessionProvider extends ChangeNotifier {
   static const Duration _refreshRate = Duration(milliseconds: 100);

@@ -6,7 +6,7 @@ import 'package:skill_timer/widgets/floating_timer.dart';
 import 'package:skill_timer/providers/skill_category_provider.dart';
 import 'package:skill_timer/providers/time_session_provider.dart';
 import 'package:skill_timer/utils/constants.dart';
-import 'package:skill_timer/providers/foreground_timer_service.dart';
+import 'package:skill_timer/services/foreground_timer_service.dart';
 import 'package:skill_timer/theme/app_theme.dart';
 
 class SkillTimerApp extends StatefulWidget {
