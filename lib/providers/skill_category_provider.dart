@@ -353,6 +353,87 @@ class SkillProvider extends ChangeNotifier {
     }
   }
 
+  Future<bool> updateSession(LearningSession session) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      final index = _learningSessions.indexWhere(
+        (item) => item.id == session.id,
+      );
+      if (index == -1) {
+        throw StateError('Session not loaded');
+      }
+
+      final db = await DBProvider().database;
+      final updatedRows = await db.update(
+        'timer_sessions',
+        session.toMap(),
+        where: 'id = ?',
+        whereArgs: [session.id],
+      );
+      if (updatedRows == 0) {
+        throw StateError('Session not found');
+      }
+
+      _learningSessions[index] = session;
+      _recalculateSkillStats();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('Failed to update session: ${e.toString()}');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  Future<bool> deleteSession(String id) async {
+    _setLoading(true);
+    _clearError();
+
+    try {
+      if (!_learningSessions.any((session) => session.id == id)) {
+        throw StateError('Session not loaded');
+      }
+
+      final db = await DBProvider().database;
+      final deletedRows = await db.delete(
+        'timer_sessions',
+        where: 'id = ?',
+        whereArgs: [id],
+      );
+      if (deletedRows == 0) {
+        throw StateError('Session not found');
+      }
+
+      _learningSessions.removeWhere((session) => session.id == id);
+      _recalculateSkillStats();
+      notifyListeners();
+      return true;
+    } catch (e) {
+      _setError('Failed to delete session: ${e.toString()}');
+      return false;
+    } finally {
+      _setLoading(false);
+    }
+  }
+
+  void _recalculateSkillStats() {
+    _skills = _skills.map((skill) {
+      final sessions = _learningSessions.where(
+        (session) => session.skillId == skill.id,
+      );
+      return skill.copyWith(
+        totalTimeSpent: sessions.fold<int>(
+          0,
+          (total, session) => total + session.duration,
+        ),
+        sessionsCount: sessions.length,
+      );
+    }).toList();
+  }
+
   // Helper methods for session filtering and analysis
   List<LearningSession> getSessionsForMonth(DateTime month) {
     return _learningSessions.where((session) {

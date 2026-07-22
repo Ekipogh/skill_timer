@@ -344,6 +344,35 @@ class _SessionReportState extends State<SessionReport> {
                             style: Theme.of(context).textTheme.bodyMedium
                                 ?.copyWith(fontWeight: FontWeight.bold),
                           ),
+                          PopupMenuButton<_SessionAction>(
+                            tooltip: 'Session actions',
+                            onSelected: (action) {
+                              switch (action) {
+                                case _SessionAction.edit:
+                                  _editSession(session, provider);
+                                case _SessionAction.delete:
+                                  _deleteSession(session, skill.name, provider);
+                              }
+                            },
+                            itemBuilder: (context) => const [
+                              PopupMenuItem(
+                                value: _SessionAction.edit,
+                                child: ListTile(
+                                  leading: Icon(Icons.edit_outlined),
+                                  title: Text('Edit'),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                              PopupMenuItem(
+                                value: _SessionAction.delete,
+                                child: ListTile(
+                                  leading: Icon(Icons.delete_outline),
+                                  title: Text('Delete'),
+                                  contentPadding: EdgeInsets.zero,
+                                ),
+                              ),
+                            ],
+                          ),
                         ],
                       ),
                     );
@@ -356,6 +385,69 @@ class _SessionReportState extends State<SessionReport> {
         ),
       ),
     );
+  }
+
+  Future<void> _editSession(
+    LearningSession session,
+    SkillProvider provider,
+  ) async {
+    final updatedSession = await showDialog<LearningSession>(
+      context: context,
+      builder: (context) =>
+          _EditSessionDialog(session: session, skills: provider.skills),
+    );
+    if (updatedSession == null || !mounted) return;
+
+    final success = await provider.updateSession(updatedSession);
+    if (!mounted) return;
+    if (success) {
+      CustomSnackBar.showSuccess(context, message: 'Session updated');
+    } else {
+      CustomSnackBar.showError(
+        context,
+        message: provider.error ?? 'Failed to update session',
+      );
+    }
+  }
+
+  Future<void> _deleteSession(
+    LearningSession session,
+    String skillName,
+    SkillProvider provider,
+  ) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete session?'),
+        content: Text(
+          '$skillName · ${Formatters.formatDuration(session.duration)} · '
+          '${Formatters.formatDate(session.datePerformed)}\n\n'
+          'This action cannot be undone.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+
+    final success = await provider.deleteSession(session.id);
+    if (!mounted) return;
+    if (success) {
+      CustomSnackBar.showSuccess(context, message: 'Session deleted');
+    } else {
+      CustomSnackBar.showError(
+        context,
+        message: provider.error ?? 'Failed to delete session',
+      );
+    }
   }
 
   void _showMonthPicker() async {
@@ -566,6 +658,219 @@ class _SessionReportState extends State<SessionReport> {
           ),
         ),
       ],
+    );
+  }
+}
+
+enum _SessionAction { edit, delete }
+
+class _EditSessionDialog extends StatefulWidget {
+  const _EditSessionDialog({required this.session, required this.skills});
+
+  final LearningSession session;
+  final List<Skill> skills;
+
+  @override
+  State<_EditSessionDialog> createState() => _EditSessionDialogState();
+}
+
+class _EditSessionDialogState extends State<_EditSessionDialog> {
+  final _formKey = GlobalKey<FormState>();
+  late String _skillId;
+  late DateTime _date;
+  late final TextEditingController _hoursController;
+  late final TextEditingController _minutesController;
+  late final TextEditingController _secondsController;
+
+  @override
+  void initState() {
+    super.initState();
+    _skillId = widget.session.skillId;
+    _date = widget.session.datePerformed;
+    _hoursController = TextEditingController(
+      text: (widget.session.duration ~/ 3600).toString(),
+    );
+    _minutesController = TextEditingController(
+      text: ((widget.session.duration % 3600) ~/ 60).toString(),
+    );
+    _secondsController = TextEditingController(
+      text: (widget.session.duration % 60).toString(),
+    );
+  }
+
+  @override
+  void dispose() {
+    _hoursController.dispose();
+    _minutesController.dispose();
+    _secondsController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final hasCurrentSkill = widget.skills.any((skill) => skill.id == _skillId);
+    return AlertDialog(
+      title: const Text('Edit session'),
+      content: SingleChildScrollView(
+        child: Form(
+          key: _formKey,
+          child: SizedBox(
+            width: 360,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                DropdownButtonFormField<String>(
+                  initialValue: _skillId,
+                  decoration: const InputDecoration(
+                    labelText: 'Skill',
+                    prefixIcon: Icon(Icons.psychology_outlined),
+                    border: OutlineInputBorder(),
+                  ),
+                  items: [
+                    if (!hasCurrentSkill)
+                      DropdownMenuItem(
+                        value: _skillId,
+                        child: const Text('Unknown skill'),
+                      ),
+                    ...widget.skills.map(
+                      (skill) => DropdownMenuItem(
+                        value: skill.id,
+                        child: Text(skill.name),
+                      ),
+                    ),
+                  ],
+                  onChanged: (value) {
+                    if (value != null) _skillId = value;
+                  },
+                ),
+                const SizedBox(height: 16),
+                InkWell(
+                  onTap: _pickDate,
+                  borderRadius: BorderRadius.circular(4),
+                  child: InputDecorator(
+                    decoration: const InputDecoration(
+                      labelText: 'Date',
+                      prefixIcon: Icon(Icons.calendar_today_outlined),
+                      border: OutlineInputBorder(),
+                    ),
+                    child: Text(Formatters.formatDate(_date)),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                Text('Duration', style: Theme.of(context).textTheme.labelLarge),
+                const SizedBox(height: 8),
+                Row(
+                  children: [
+                    Expanded(child: _durationField('Hours', _hoursController)),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _durationField(
+                        'Minutes',
+                        _minutesController,
+                        maximum: 59,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: _durationField(
+                        'Seconds',
+                        _secondsController,
+                        maximum: 59,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton.icon(
+          onPressed: _save,
+          icon: const Icon(Icons.save_outlined),
+          label: const Text('Save changes'),
+        ),
+      ],
+    );
+  }
+
+  Widget _durationField(
+    String label,
+    TextEditingController controller, {
+    int? maximum,
+  }) {
+    return TextFormField(
+      controller: controller,
+      keyboardType: TextInputType.number,
+      decoration: InputDecoration(
+        labelText: label,
+        border: const OutlineInputBorder(),
+      ),
+      validator: (value) {
+        final number = int.tryParse(value ?? '');
+        if (number == null ||
+            number < 0 ||
+            (maximum != null && number > maximum)) {
+          return maximum == null ? 'Invalid' : '0–$maximum';
+        }
+        return null;
+      },
+    );
+  }
+
+  Future<void> _pickDate() async {
+    final today = DateTime.now();
+    final defaultFirstDate = DateTime(2020);
+    final firstDate = _date.isBefore(defaultFirstDate)
+        ? _date
+        : defaultFirstDate;
+    final lastDate = _date.isAfter(today) ? _date : today;
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: _date,
+      firstDate: firstDate,
+      lastDate: lastDate,
+    );
+    if (picked == null) return;
+    setState(() {
+      _date = DateTime(
+        picked.year,
+        picked.month,
+        picked.day,
+        _date.hour,
+        _date.minute,
+        _date.second,
+        _date.millisecond,
+        _date.microsecond,
+      );
+    });
+  }
+
+  void _save() {
+    if (!_formKey.currentState!.validate()) return;
+    final duration =
+        int.parse(_hoursController.text) * 3600 +
+        int.parse(_minutesController.text) * 60 +
+        int.parse(_secondsController.text);
+    if (duration == 0) {
+      CustomSnackBar.showError(
+        context,
+        message: 'Duration must be greater than zero',
+      );
+      return;
+    }
+    Navigator.of(context).pop(
+      widget.session.copyWith(
+        skillId: _skillId,
+        datePerformed: _date,
+        duration: duration,
+      ),
     );
   }
 }
