@@ -14,15 +14,37 @@ class SkillProvider extends ChangeNotifier {
   String? _error;
 
   // Getters
-  List<SkillCategory> get skillCategories =>
-      List.unmodifiable(_skillCategories);
-  List<Skill> get skills => List.unmodifiable(_skills);
+  List<SkillCategory> get skillCategories => List.unmodifiable(
+    _skillCategories.where((category) => !_isDebugCategory(category)),
+  );
+  List<Skill> get skills =>
+      List.unmodifiable(_skills.where((skill) => !_isDebugSkill(skill)));
   List<LearningSession> get learningSessions =>
-      List.unmodifiable(_learningSessions);
+      List.unmodifiable(_reportableSessions);
   bool get isLoading => _isLoading;
   String? get error => _error;
   bool get hasError => _error != null;
-  bool get isEmpty => _skillCategories.isEmpty && !_isLoading;
+  bool get isEmpty => skillCategories.isEmpty && !_isLoading;
+
+  bool _isDebugCategory(SkillCategory category) =>
+      !kDebugMode && category.name.trim().toLowerCase() == 'debug';
+
+  bool _isDebugSkill(Skill skill) {
+    if (kDebugMode) return false;
+    if (skill.name.trim().toLowerCase() == 'debug') return true;
+
+    return _skillCategories.any(
+      (category) => category.id == skill.category && _isDebugCategory(category),
+    );
+  }
+
+  List<LearningSession> get _reportableSessions {
+    if (kDebugMode) return _learningSessions;
+    final debugSkillIds = _skills.where(_isDebugSkill).map((skill) => skill.id).toSet();
+    return _learningSessions
+        .where((session) => !debugSkillIds.contains(session.skillId))
+        .toList();
+  }
 
   // Load skill categories from database
   Future<void> loadSkillCategories() async {
@@ -182,7 +204,7 @@ class SkillProvider extends ChangeNotifier {
   }
 
   getSkillsForCategory(String categoryId) {
-    return _skills.where((skill) => skill.category == categoryId).toList();
+    return skills.where((skill) => skill.category == categoryId).toList();
   }
 
   // Add a new skill
@@ -436,14 +458,14 @@ class SkillProvider extends ChangeNotifier {
 
   // Helper methods for session filtering and analysis
   List<LearningSession> getSessionsForMonth(DateTime month) {
-    return _learningSessions.where((session) {
+    return _reportableSessions.where((session) {
       return session.datePerformed.year == month.year &&
           session.datePerformed.month == month.month;
     }).toList();
   }
 
   List<LearningSession> getSessionsForSkill(String skillId) {
-    return _learningSessions
+    return _reportableSessions
         .where((session) => session.skillId == skillId)
         .toList();
   }
@@ -463,7 +485,7 @@ class SkillProvider extends ChangeNotifier {
       endDate.day,
     );
 
-    return _learningSessions.where((session) {
+    return _reportableSessions.where((session) {
       final sessionDate = DateTime(
         session.datePerformed.year,
         session.datePerformed.month,
@@ -509,11 +531,11 @@ class SkillProvider extends ChangeNotifier {
   }
 
   int getTotalTime() {
-    return _learningSessions.fold(0, (sum, session) => sum + session.duration);
+    return _reportableSessions.fold(0, (sum, session) => sum + session.duration);
   }
 
   int getTotalSessions() {
-    return _learningSessions.length;
+    return _reportableSessions.length;
   }
 
   int getAverageSessionDuration() {
@@ -523,10 +545,10 @@ class SkillProvider extends ChangeNotifier {
   }
 
   int getCurrentStreak() {
-    if (_learningSessions.isEmpty) return 0;
+    if (_reportableSessions.isEmpty) return 0;
 
     // Sort sessions by date in descending order
-    final sortedSessions = List<LearningSession>.from(_learningSessions)
+    final sortedSessions = List<LearningSession>.from(_reportableSessions)
       ..sort((a, b) => b.datePerformed.compareTo(a.datePerformed));
 
     int streak = 1;
@@ -587,7 +609,7 @@ class SkillProvider extends ChangeNotifier {
   Map<String, int> getTimeBySkill({int length = 5}) {
     final Map<String, int> skillTimeMap = {};
 
-    for (var session in _learningSessions) {
+    for (var session in _reportableSessions) {
       final skill = _skills.firstWhere(
         (s) => s.id == session.skillId,
         orElse: () => Skill(
@@ -621,7 +643,7 @@ class SkillProvider extends ChangeNotifier {
   Map<String, int> getTimeByCategory({int length = 5}) {
     final Map<String, int> categoryTimeMap = {};
 
-    for (var session in _learningSessions) {
+    for (var session in _reportableSessions) {
       final skill = _skills.firstWhere(
         (s) => s.id == session.skillId,
         orElse: () => Skill(
